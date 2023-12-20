@@ -1,6 +1,14 @@
 import time
-from utils import write
+from utils import write, cinput
+from Game import *
 
+hints = [
+    "The encryption seems to follow a famous roman emperor.",
+    "The encryption is a cesar cipher.",
+    "To solve this use a letter frequency attack."
+    "The key is a number between 0 and 26."
+    "Use the brute force version by trying every possible key."
+]
 
 def cesar_enc(key: int, plaintext: str):
     encrypted_text = ""
@@ -52,7 +60,7 @@ def cesar_dec(key: int, cypher: str):
     return decrypted_text
 
 
-def cesar_puzzle() -> time:
+def cesar_puzzle(game) -> time:
     note = (
         "You have found my note. Finally. With this you can continue to my grave, where you will find my murderer. \n"
         "There is a small lever disguised as a dagger that was plunged into my chest. \n"
@@ -72,11 +80,12 @@ def cesar_puzzle() -> time:
 
     answer = ""
 
+    hint_count = 0
     # start timer
     start = time.time()
 
     while "dagger" not in answer:
-        answer = input("What do you want to do?:\n")
+        answer = cinput("What do you want to do?:\n")
         if "encrypt" in answer:
             plaintext = answer.split(":")[1]
             print(f"{cesar_enc(14, plaintext)}\n")
@@ -87,6 +96,13 @@ def cesar_puzzle() -> time:
                 write(f"{note}\n")
             else:
                 write(cesar_dec(key, enc_note))
+        elif answer == "exit":
+            game.save_game()
+            return
+        elif answer == "hint":
+            write(f"{hints[hint_count]}\n")
+            game.set_hint_used(hints[hint_count])
+            hint_count += 1
         else:
             print(f"You {answer}.\n")
 
@@ -99,7 +115,7 @@ def cesar_puzzle() -> time:
           "wood, moss and what seems to be blood. You continue on slowly. The hair on you neck stand up and a cold \n"
           "shudder runs down you spine.\n")
 
-    return round(stop - start, 2)
+    return round(stop - start, 2), 0
 
 
 if __name__ == "__main__":

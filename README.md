@@ -1,4 +1,4 @@
-# Escaperoom_python_project
+# Escaperoom_python_project:
 
 Das hier ist einfach nur ein Repository damit alle an einem Projekt arbeiten können.
 
@@ -10,12 +10,15 @@ Ansonsten einmal eine Übersicht der aktuellen Rätsel:
 
 - cesar puzzle [done]
 - logic puzzle [in progress]
-- 
 
-# Ideen
+# Wichtige Funktionen:
+- cinput für user input mit zentriertem prompt
+- write für print mit typing style output und text formatting tags
+
+# Ideen:
 Hier können wir noch Ideen aufschreiben für weitere Rätsel und ansonsten Anmerkungen zu anderen Themen
 
-# Git commands
+# Git commands:
 Um seine änderungen hinzu zu fügen muss ins Terminal folgendes geschrieben werden 
 
 - git add -A 
@@ -25,6 +28,6 @@ Um seine änderungen hinzu zu fügen muss ins Terminal folgendes geschrieben wer
 Um sich den aktuellen Stand des Branches zu holen:
 - git pull origin main
 
-# Sonstiges
+# Sonstiges:
 Ins .gitignore können Pfade von Dateien und Directories, die nicht beachtet werden sollen und somit nicht ins Git gepusht werden.
 

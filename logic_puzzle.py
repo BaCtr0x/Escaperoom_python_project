@@ -1,8 +1,15 @@
 import time
-from utils import write
+from utils import write, cinput
+from Game import *
 
+hints = [
+    "The stones are jade, saphire, ruby and obsidian.",
+    "Obsidian is last.",
+    "Jade is next to saphire.",
+    "Saphire is first."
+]
 
-def logic_puzzle() -> time:
+def logic_puzzle(game) -> time:
     puzzle_symbols = ["jade", "sapphire", "ruby", "obsidian"]
     write("A cold shiver runs down your spine as you walk through the sick blizzard that pushes down the mountain side.\n"
           "You can not put a finger on it, but everything around you seems to be off somehow, as you see the dark wood \n"
@@ -31,9 +38,10 @@ def logic_puzzle() -> time:
           "- Jade isn't in spot 3.\n"
           "- Ruby isn't next to saphire.\n"
           "- Obsidian isn't next to either jade or saphire.\n \n")
+    hint_count = 0
     start = time.time()
     while True:
-        ans = input("Which order do you choose? 'a,b,c,d'\n").replace(" ", "").split(",")
+        ans = cinput("Which order do you choose? 'a,b,c,d'\n").replace(" ", "").split(",")
         if ans == ["saphire", "jade", "ruby", "obsidian"]:
             stop = time.time()
             write("You move the symbols around and with a quite 'click' they lock in place. The fireplace instantly \n"
@@ -41,8 +49,16 @@ def logic_puzzle() -> time:
                   "a door forming in the wall. A short hall opens in front of you that terminates in another room. The \n"
                   "smell is old and musty and you get the feeling that this won't be such a simple case, as you \n"
                   "continue on.\n \n")
-            return round(stop - start, 2)
-        # check whether the input is in the correct form or not
+            return round(stop - start, 2), 0
+        elif ans[0] == "exit":
+            game.save_game()
+            # TODO: muss angepasst werden, so ist das unschön, maybe complete_level hierhin ziehen
+            return 0, 0
+        elif ans[0] == "hint":
+            write(f"{hints[hint_count]}\n")
+            game.set_hint_used(hints[hint_count])
+            hint_count += 1
+        # check whether the cinput is in the correct form or not
         elif bool([element for element in ans if element not in puzzle_symbols]):
             print("Please write your answer in the form of: a,b,c,d")
         else:

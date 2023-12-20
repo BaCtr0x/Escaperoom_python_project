@@ -6,10 +6,31 @@ import os
 import json
 from datetime import datetime
 import shutil
+import matplotlib.pyplot as plt
+import seaborn as sb
+
+# ------------------------------------------- Global Values -----------------------------------------------------------
+
+# value changed through options function in main.py 0.015, for debugging set this to 0.00
+default_delay = 0.00
+
+# ---------------------------------------- Classes and Structs ---------------------------------------------------------
 
 
-# value changed through options function in main.py
-default_delay = 0.015
+# defines all the colors and bold and italic for the tags
+TAG_COLORS = {
+    'b': '1',  # Bold
+    'it': '3',  # Italic
+    'r': '91',  # Red
+    'g': '92',  # Green
+    'y': '93',  # Yellow
+    'p': '95',  # Purple
+    'c': '96',  # Cyan
+    'lp': '94'  # Light purple
+}
+
+
+# ----------------------------------------- Utility Functions ----------------------------------------------------------
 
 
 # A simple function to change the typing speed of the write function
@@ -87,43 +108,37 @@ def is_closing_tag(tag):
 # prints the given text in a writing like style. This is not yet gorgeous, but a start delay=0.015
 # for debugging I would set delay to 0.0 to have a print like behavior
 # Given different tags in [] you can add italic, bold, red, green, cyan, purple and yellow text.
+# The different tags are defined at the top of this file under TAG_COLORS
 def write(text: str, delay=None):
     delay = default_delay if delay is None else delay
-    padding_len = (get_terminal_width() - get_text_len_without_tag(text)) // 2
-    sys.stdout.write(' ' * padding_len)
-    in_tag = False
-    for char in text:
-        if char == '[':
-            in_tag = True
-            tag = ''
-        elif char == ']' and in_tag:
-            in_tag = False
-            if tag == 'b':
-                sys.stdout.write('\033[1m')     # Start bold
-            elif tag == 'it':
-                sys.stdout.write('\033[3m')     # Start italic
-            elif tag == 'r':
-                sys.stdout.write('\033[91m')    # Start red
-            elif tag == 'g':
-                sys.stdout.write('\033[92m')    # Start green
-            elif tag == 'y':
-                sys.stdout.write('\033[91m')    # Start yellow
-            elif tag == 'p':
-                sys.stdout.write('\033[95m')    # Start purple
-            elif tag == 'c':
-                sys.stdout.write('\033[96m')    # Start cyan
-            elif tag == 'lp':
-                sys.stdout.write('\033[94m')    # Start yellow
-            elif is_closing_tag(tag):
-                sys.stdout.write('\033[0m')     # End special case
+
+    def print_centered_line(line):
+        padding_len = (get_terminal_width() - get_text_len_without_tag(line)) // 2
+        sys.stdout.write(' ' * padding_len)
+        in_tag = False
+        for char in line:
+            if char == '[':
+                in_tag = True
+                tag = ''
+            elif char == ']' and in_tag:
+                in_tag = False
+                if tag in ['b', 'it', 'r', 'g', 'y', 'p', 'c', 'lp']:
+                    sys.stdout.write(f'\033[{TAG_COLORS[tag]}m')
+                elif is_closing_tag(tag):
+                    sys.stdout.write('\033[0m')  # End special case
+                else:
+                    sys.stdout.write('[' + tag + ']')  # Print unrecognized tag
+            elif in_tag:
+                tag += char
             else:
-                sys.stdout.write('[' + tag + ']')  # Print unrecognized tag
-        elif in_tag:
-            tag += char
-        else:
-            sys.stdout.write(char)
-        sys.stdout.flush()
-        time.sleep(delay)
+                sys.stdout.write(char)
+            sys.stdout.flush()
+            time.sleep(delay)
+
+    lines = text.split('\n')
+    for line in lines:
+        print_centered_line(line)
+        sys.stdout.write('\n')  # Move to the next line after printing a centered line
 
 
 # helper function to store times in a dictionary
@@ -136,10 +151,6 @@ def get_date() -> str:
     date = datetime.now()
     date = date.strftime("%d-%m-%Y_%H:%M")
     return date
-
-
-def save_game(game: dict, player: str):
-    name = player + get_date()
 
 
 def print_red(skk):
@@ -174,14 +185,28 @@ def print_black(skk):
     print(f"\033[98m {skk}\033[00m")
 
 
-def cinput(prompt):
+# This function centers the input prompt to fit the centering of the write function
+def cinput(prompt=""):
     padding = (get_terminal_width() - len(prompt)) // 2
     input_text = input(' ' * padding + prompt)
     return input_text
+
+
+# This function filters the loaded games from the json file by a given player name
+def filter_dict_by_name(games: dict, name: str) -> dict:
+    games_list = [elem for elem in games.keys() if name in elem]
+    filtered_games = {}
+    for game in games_list:
+        filtered_games[game] = games[game]
+    return filtered_games
+
+
+def line_plot_times_name(games: dict, name: str):
+    print("moin")
+
 
 
 if __name__ == "__main__":
     # Example usage:
     write("[b]Bold[/b] and [it]italic[/it] text. With [r]red[/r], [g]green[/g], [y]yellow[/y], [c]cyan[/c], "
           "[p]purple[/p] and [lp] light purple[/lp] options. \n")
-
