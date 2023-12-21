@@ -4,7 +4,6 @@ from logic_puzzle import logic_puzzle
 from utils import *
 
 # This acts like an interface, here are all the levels that are playable
-# TODO: add a function to the puzzles that allows the users to get a hint and increase the hint counter :)
 levels = {
     0: logic_puzzle,
     1: cesar_puzzle
@@ -39,9 +38,15 @@ class Game:
     def __init__(self, player_name, current_level=0):
         self._player_name = player_name
         self._current_level = current_level
-        self._levels_completed = {}  # could be ignored as it can be calculated from current_level but nice to have
+        self._levels_completed = {}
         self._hints_used = {}
         self._unique_identifier = self.generate_unique_identifier()
+
+    def __get_level_name(self, level_ind=-1) -> str:
+        if level_ind == -1:
+            return str(levels[self._current_level]).split("at")[0].split(" ")[1]
+        else:
+            return str(levels[level_ind]).split("at")[0].split(" ")[1]
 
     def get_player_name(self) -> str:
         return self._player_name
@@ -52,25 +57,33 @@ class Game:
     def get_levels_completed(self) -> dict:
         return self._levels_completed
 
-    def get_hints_used(self, level: str) -> int:
-        return self._num_hints_used[level]
+    def get_hints_used(self, level_ind=-1) -> list:
+        if level_ind == -1:
+            return self._hints_used[self.__get_level_name(self._current_level)]
+        try:
+            return self._hints_used[self.__get_level_name(level_ind)]
+        except KeyError:
+            return []
 
     def set_hint_used(self, hint: str):
-        if self._current_level not in self._hints_used.keys():
-            self._hints_used[self._current_level] = [hint]
+        level = self.__get_level_name()
+        if self.__get_level_name() not in self._hints_used.keys():
+            self._hints_used[level] = [hint]
         else:
-            self._hints_used[self._current_level].append(hint)
+            self._hints_used[level].append(hint)
 
     def generate_unique_identifier(self) -> str:
         return f"{self._player_name}_{get_date()}"
 
-    def complete_level(self, level, time_taken, hints_used):
-        self._levels_completed[level] = time_taken
+    def complete_level(self, level: str, time_taken: time, hints_used: list):
+        if level in self._levels_completed.keys():
+            self._levels_completed[level] += time_taken
+        else:
+            self._levels_completed[level] = time_taken
         self._hints_used[level] = hints_used
         self._current_level += 1
         self.save_game()
 
-# TODO: store the given hints as well such that they can be displayed when a game is loaded later on
     def save_game(self, filename=default_filename):
         game_data = {
             'player_name': self._player_name,
@@ -96,12 +109,19 @@ class Game:
 
     def play(self) -> int:
         while self._current_level < len(levels.keys()):
-            level_time, num_hints = levels[self._current_level](self)
+            level_time, hints, ex = levels[self._current_level](self)
+            if ex == 1:
+                return 1
             level_name = str(levels[self._current_level]).split("at")[0].split(" ")[1]
-            self.complete_level(level_name, level_time, num_hints)
+            self.complete_level(level_name, level_time, hints)
         write("[b]Thanks for playing our game, we hope you enjoyed it :)[/b]\n")
         inp = cinput("Do you want to go back to the main menu (1) or exit the game (2)?\n")
-        return inp
+        try:
+            inp = int(inp)
+            return inp
+        except KeyError:
+            write("You entered something else, we will move you to the main menu :)\n")
+            return 1
 
     # TODO: make sure that the time stored is added to the time it is measuring after continue playing
     def load_game(self, filename=default_filename):

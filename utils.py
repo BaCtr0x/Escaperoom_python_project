@@ -6,8 +6,6 @@ import os
 import json
 from datetime import datetime
 import shutil
-import matplotlib.pyplot as plt
-import seaborn as sb
 
 # ------------------------------------------- Global Values -----------------------------------------------------------
 
@@ -17,7 +15,7 @@ default_delay = 0.00
 # ---------------------------------------- Classes and Structs ---------------------------------------------------------
 
 
-# defines all the colors and bold and italic for the tags
+# defines all the colors and bold and italic for the tags based on ANSI escape sequences
 TAG_COLORS = {
     'b': '1',  # Bold
     'it': '3',  # Italic
@@ -153,36 +151,8 @@ def get_date() -> str:
     return date
 
 
-def print_red(skk):
-    print(f"\033[91m {skk}\033[00m")
-
-
-def print_green(skk):
-    print(f"\033[92m {skk}\033[00m")
-
-
-def print_yellow(skk):
-    print(f"\033[93m {skk}\033[00m")
-
-
-def print_lg_purple(skk):
-    print(f"\033[94m {skk}\033[00m")
-
-
-def print_purple(skk):
-    print(f"\033[95m {skk}\033[00m")
-
-
-def print_cyan(skk):
-    print(f"\033[96m {skk}\033[00m")
-
-
-def print_lg_cyan(skk):
-    print(f"\033[97m {skk}\033[00m")
-
-
-def print_black(skk):
-    print(f"\033[98m {skk}\033[00m")
+def print_hint(hint: str):
+    write(f"[y]{hint}[/y]\n")
 
 
 # This function centers the input prompt to fit the centering of the write function
@@ -192,18 +162,31 @@ def cinput(prompt=""):
     return input_text
 
 
-# This function filters the loaded games from the json file by a given player name
-def filter_dict_by_name(games: dict, name: str) -> dict:
-    games_list = [elem for elem in games.keys() if name in elem]
-    filtered_games = {}
-    for game in games_list:
-        filtered_games[game] = games[game]
-    return filtered_games
+# this function handles the basic commands for help, hint and exit
+def default_commands(inp: str, hints: list, hint_count: int, game) -> time:
+    if "ex" in inp:
+        stop = time.time()
+        game.save_game()
+        return stop
+    elif "he" in inp:
+        help_text()
+    elif "_" in inp:
+        old_hints = '\n'.join(game.get_hints_used())
+        write(f"[y]{old_hints}[/y]\n")
+    elif "hi" in inp:
+        print_hint(hints[hint_count])
+        game.set_hint_used(hints[hint_count])
+        hint_count += 1 + len(game.get_hints_used(game.get_current_level()))
+    return 0
 
 
-def line_plot_times_name(games: dict, name: str):
-    print("moin")
-
+# a help function that allows the user to always write help to get help
+def help_text():
+    write("[c]You can either do type the answer. Be aware, that it will require you to enter the answer\n"
+          "as stated by the prompt. The other options are: \n"
+          "- 'hint', to get a hint for the current puzzle\n"
+          "- 'exit', to get back to the main menu.[/c]\n"
+          "- 'old_hints' if you loaded a game you can get your hints back\n")
 
 
 if __name__ == "__main__":

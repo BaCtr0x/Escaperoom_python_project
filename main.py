@@ -2,6 +2,7 @@ import re
 
 from Game import *
 from utils import write, clear_console, change_typing_speed, cinput
+from visuallize import show_stats
 
 
 # This is supposed to be the main file in which the outer structure of the game is going to be placed
@@ -36,19 +37,6 @@ def load_game() -> bool:
     return False
 
 
-# TODO: this needs to be filled.
-#  Maybe write functions for time by name showing the different times for each level by a given name and others
-#  and access them through a dictionary, like the main menu management. The functions could then reside in the utils.py
-def show_stats() -> bool:
-    write("[b] Statistics [/b]")
-    filename = 'game_data.json'
-    stored_games = {}
-    with open(filename, 'r') as json_file:
-        stored_games = json.load(json_file)
-
-    return False
-
-
 def options() -> bool:
     write("[b]Options[/b]\n", 0)
     write(
@@ -73,8 +61,8 @@ def options() -> bool:
             write("This is an example to show you the typing speed you entered.\n")
 
 
-def exit():
-    # check if unsaved information is still running, save them end the programm
+def exit_game():
+    # TODO: check if unsaved information is still running, save them end the programm
     return True
 
 
@@ -98,7 +86,7 @@ def main_menu():
         2: load_game,
         3: show_stats,
         4: options,
-        5: exit
+        5: exit_game
     }
 
     # helper variable for displaying menu
@@ -113,6 +101,7 @@ def main_menu():
             write("3. Show stats \n", 0)
             write("4. Options \n", 0)
             write("5. Exit game\n", 0)
+            write("You can always type 'help', to see what you can do.\n", 0)
 
             user_inp = main_menu_selection(cinput("What do you want to do?\n"))
         if user_inp != -1:

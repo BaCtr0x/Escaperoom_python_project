@@ -1,5 +1,5 @@
 import time
-from utils import write, cinput
+from utils import write, cinput, default_commands
 from Game import *
 
 hints = [
@@ -9,6 +9,7 @@ hints = [
     "The key is a number between 0 and 26."
     "Use the brute force version by trying every possible key."
 ]
+
 
 def cesar_enc(key: int, plaintext: str):
     encrypted_text = ""
@@ -78,33 +79,31 @@ def cesar_puzzle(game) -> time:
           "as well as a dark pen. It seems that you can use the machine to decode the note, but the correct key is missing. \n"
           "Maybe you can use the machine by writing 'encrypt: text' or 'decrypt: key'.\n")
 
-    answer = ""
+    ans = ""
 
-    hint_count = 0
+    hint_count = len(game.get_hints_used(game.get_current_level()))
     # start timer
     start = time.time()
 
-    while "dagger" not in answer:
-        answer = cinput("What do you want to do?:\n")
-        if "encrypt" in answer:
-            plaintext = answer.split(":")[1]
+    while "dagger" not in ans:
+        ans = cinput("What do you want to do?:\n")
+        if "encrypt" in ans:
+            plaintext = ans.split(":")[1]
             print(f"{cesar_enc(14, plaintext)}\n")
-        elif "decrypt" in answer:
-            inp = answer.split(":")[1]
+        elif "decrypt" in ans:
+            inp = ans.split(":")[1]
             key = int(inp)
             if key == 14:
                 write(f"{note}\n")
             else:
                 write(cesar_dec(key, enc_note))
-        elif answer == "exit":
-            game.save_game()
-            return
-        elif answer == "hint":
-            write(f"{hints[hint_count]}\n")
-            game.set_hint_used(hints[hint_count])
-            hint_count += 1
+        elif "ex" in ans or "hi" in ans or "he" in ans or "_" in ans:
+            stop = default_commands(ans, hints, hint_count, game)
+            if stop != 0:
+                return round(stop - start, 2), hints[:hint_count], 1
         else:
-            print(f"You {answer}.\n")
+            print(f"You {ans}.\n"
+                  f"nothing seems to happen\n")
 
     # stop timer
     stop = time.time()
@@ -115,8 +114,5 @@ def cesar_puzzle(game) -> time:
           "wood, moss and what seems to be blood. You continue on slowly. The hair on you neck stand up and a cold \n"
           "shudder runs down you spine.\n")
 
-    return round(stop - start, 2), 0
+    return round(stop - start, 2), hints[:hint_count], 0
 
-
-if __name__ == "__main__":
-    print(f"It took {cesar_puzzle()} seconds to solve the puzzle")

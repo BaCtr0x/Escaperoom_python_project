@@ -1,0 +1,36 @@
+{
+    "penis_21-12-2023_12:44": {
+        "player_name": "penis",
+        "current_level": 0,
+        "levels_completed": {},
+        "hints_used": {
+            "logic_puzzle": [
+                "Obsidian is last."
+            ]
+        }
+    },
+    "jmb_21-12-2023_12:45": {
+        "player_name": "jmb",
+        "current_level": 1,
+        "levels_completed": {
+            "logic_puzzle": 6.31
+        },
+        "hints_used": {
+            "logic_puzzle": [
+                "The stones are jade, saphire, ruby and obsidian.",
+                "Obsidian is last.",
+                "Jade is next to saphire."
+            ]
+        }
+    },
+    "?_21-12-2023_13:45": {
+        "player_name": "?",
+        "current_level": 1,
+        "levels_completed": {
+            "logic_puzzle": 11.82
+        },
+        "hints_used": {
+            "logic_puzzle": []
+        }
+    }
+}

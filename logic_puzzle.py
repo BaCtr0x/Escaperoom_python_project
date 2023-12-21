@@ -1,5 +1,5 @@
 import time
-from utils import write, cinput
+from utils import write, cinput, default_commands
 from Game import *
 
 hints = [
@@ -8,6 +8,7 @@ hints = [
     "Jade is next to saphire.",
     "Saphire is first."
 ]
+
 
 def logic_puzzle(game) -> time:
     puzzle_symbols = ["jade", "sapphire", "ruby", "obsidian"]
@@ -38,26 +39,23 @@ def logic_puzzle(game) -> time:
           "- Jade isn't in spot 3.\n"
           "- Ruby isn't next to saphire.\n"
           "- Obsidian isn't next to either jade or saphire.\n \n")
-    hint_count = 0
+    hint_count = len(game.get_hints_used(game.get_current_level()))
     start = time.time()
     while True:
-        ans = cinput("Which order do you choose? 'a,b,c,d'\n").replace(" ", "").split(",")
-        if ans == ["saphire", "jade", "ruby", "obsidian"]:
+        ans = cinput("Which order do you choose? 'a,b,c,d'\n").replace(" ", "")
+        if ans == "saphire,jade,ruby,obsidian":
             stop = time.time()
             write("You move the symbols around and with a quite 'click' they lock in place. The fireplace instantly \n"
                   "extinguishes. And with the sound of splitting wood, you see in the flickering light of your candle\n"
                   "a door forming in the wall. A short hall opens in front of you that terminates in another room. The \n"
                   "smell is old and musty and you get the feeling that this won't be such a simple case, as you \n"
                   "continue on.\n \n")
-            return round(stop - start, 2), 0
-        elif ans[0] == "exit":
-            game.save_game()
-            # TODO: muss angepasst werden, so ist das unschön, maybe complete_level hierhin ziehen
-            return 0, 0
-        elif ans[0] == "hint":
-            write(f"{hints[hint_count]}\n")
-            game.set_hint_used(hints[hint_count])
-            hint_count += 1
+
+            return round(stop - start, 2), hints[:hint_count], 0
+        elif "ex" in ans or "hi" in ans or "he" in ans or "_" in ans:
+            stop = default_commands(ans, hints, hint_count, game)
+            if stop != 0:
+                return round(stop - start, 2), hints[:hint_count], 1
         # check whether the cinput is in the correct form or not
         elif bool([element for element in ans if element not in puzzle_symbols]):
             print("Please write your answer in the form of: a,b,c,d")
