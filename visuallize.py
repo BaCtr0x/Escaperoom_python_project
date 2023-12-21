@@ -45,6 +45,8 @@ def plot_times_sp(games: dict, name: str):
     print("moin")
 
 
+# This function creates a line plot of the times for each puzzle of all players, where these times are the personal
+# bests of each player for each puzzle
 def plot_times_all(games: dict):
     games = get_games_with_completed_levels(games)
     data = create_dict_completed_levels(games)
@@ -90,7 +92,6 @@ def score_board(games: dict):
 # TODO: this needs to be filled.
 #  Maybe write functions for time by name showing the different times for each level by a given name and others
 #  and access them through a dictionary, like the main menu management. The functions could then reside in the utils.py
-
 def show_stats() -> bool:
     write("[b] Statistics [/b]")
     filename = 'game_data.json'
@@ -98,6 +99,7 @@ def show_stats() -> bool:
     with open(filename, 'r') as json_file:
         stored_games = json.load(json_file)
 
+    # dictionary as an interface
     stat_options = {
         1: plot_times_all,
         2: plot_times_sp,
