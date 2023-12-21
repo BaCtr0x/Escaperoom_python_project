@@ -32,5 +32,41 @@
         "hints_used": {
             "logic_puzzle": []
         }
+    },
+    "julian_21-12-2023_14:15": {
+        "player_name": "julian",
+        "current_level": 2,
+        "levels_completed": {
+            "logic_puzzle": 7.96,
+            "cesar_puzzle": 3.05
+        },
+        "hints_used": {
+            "logic_puzzle": [],
+            "cesar_puzzle": []
+        }
+    },
+    "julian_21-12-2023_14:16": {
+        "player_name": "julian",
+        "current_level": 2,
+        "levels_completed": {
+            "logic_puzzle": 30.04,
+            "cesar_puzzle": 28.3
+        },
+        "hints_used": {
+            "logic_puzzle": [],
+            "cesar_puzzle": []
+        }
+    },
+    "Lia_21-12-2023_14:35": {
+        "player_name": "Lia",
+        "current_level": 2,
+        "levels_completed": {
+            "logic_puzzle": 9.73,
+            "cesar_puzzle": 13.71
+        },
+        "hints_used": {
+            "logic_puzzle": [],
+            "cesar_puzzle": []
+        }
     }
 }

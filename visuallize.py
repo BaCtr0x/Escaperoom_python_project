@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import seaborn as sb
+import seaborn as sns
 import pandas as pd
 import json
 from utils import write, cinput
@@ -16,7 +16,18 @@ def get_games_with_used_hints(games: dict) -> dict:
 
 
 def create_dict_completed_levels(games: dict) -> dict:
-    print("moin")
+    res = {}
+
+    for key, value in games.items():
+        player_name = value["player_name"]
+
+        if player_name not in res:
+            res[player_name] = {}
+
+        for level, time_taken in value["levels_completed"].items():
+            if level not in res[player_name] or time_taken < res[player_name][level]:
+                res[player_name][level] = time_taken
+    return res
 
 
 # This function filters the loaded games from the json file by a given player name
@@ -36,9 +47,24 @@ def plot_times_sp(games: dict, name: str):
 
 def plot_times_all(games: dict):
     games = get_games_with_completed_levels(games)
-    df = pd.DataFrame(games)
-    sb.lineplot()
-    print("moin")
+    data = create_dict_completed_levels(games)
+
+    # create a dataframe from the data
+    df = pd.DataFrame(data)
+
+    # Use seaborn for plotting
+    sns.set(style="darkgrid")
+
+    palette = sns.color_palette("mako_r", len(data.keys()))
+    sns.lineplot(data=df, markers=True, palette=palette)
+
+    # Set labels and title
+    plt.xlabel('Levels')
+    plt.ylabel('Time')
+    plt.title('Best Times per Level')
+
+    # Show the plot
+    plt.show()
 
 
 def plot_hints_sp(games: dict):
@@ -92,13 +118,17 @@ def show_stats() -> bool:
           "8. exit")
     inp = cinput("What do you want to do, please enter a number.\n")
     while True:
+        if "ex" in inp:
+            return False
         try:
             inp = int(inp)
             if inp == 8:
-                return True
-            elif inp < 9:
-                return stat_options[inp](stored_games)
+                return False
+            elif inp < 8:
+                stat_options[inp](stored_games)
+                inp = cinput("What do you want to do now?\n")
+                continue
             else:
                 inp = cinput("Please enter a valid number.")
-        except KeyError:
+        except ValueError:
             inp = cinput("Please enter a valid number.")
