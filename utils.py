@@ -170,7 +170,7 @@ def default_commands(inp: str, hints: list, hint_count: int, game) -> time:
         return stop
     elif "he" in inp:
         help_text()
-    elif "_" in inp:
+    elif "o_h" in inp:
         old_hints = '\n'.join(game.get_hints_used())
         write(f"[y]{old_hints}[/y]\n")
     elif "hi" in inp:

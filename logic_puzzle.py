@@ -9,7 +9,7 @@ hints = [
     "Saphire is first."
 ]
 
-
+# TODO: Puzzle umbauen mit puzzle class :D
 def logic_puzzle(game) -> time:
     puzzle_symbols = ["jade", "sapphire", "ruby", "obsidian"]
     write("A cold shiver runs down your spine as you walk through the sick blizzard that pushes down the mountain side.\n"

@@ -68,5 +68,17 @@
             "logic_puzzle": [],
             "cesar_puzzle": []
         }
+    },
+    "maren_22-12-2023_16:43": {
+        "player_name": "maren",
+        "current_level": 2,
+        "levels_completed": {
+            "logic_puzzle": 25.22,
+            "cesar_puzzle": 26.36
+        },
+        "hints_used": {
+            "logic_puzzle": [],
+            "cesar_puzzle": []
+        }
     }
 }
