@@ -37,6 +37,7 @@ def load_game() -> bool:
     return False
 
 
+# TODO: add the ability to delete save state :D
 def options() -> bool:
     write("[b]Options[/b]\n", 0)
     write(
