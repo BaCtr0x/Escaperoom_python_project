@@ -37,14 +37,14 @@ def random_start_end(dim: int, min_distance=0) -> list:
         e_direct = random.randint(0, 1)
 
         if s_direct == 0:
-            start = [random.randint(1, dim - 1), 0]
+            start = [random.randint(1, 2 * dim - 1), 0]
         else:
-            start = [0, random.randint(1, dim - 1)]
+            start = [0, random.randint(1, 2 * dim - 1)]
 
         if e_direct == 0:
-            end = [0, random.randint(1, dim - 1)]
+            end = [0, random.randint(1, 2 * dim - 1)]
         else:
-            end = [random.randint(1, dim - 1), 0]
+            end = [random.randint(1, 2 * dim - 1), 0]
 
         test_distance = calculate_distance(start, end)
 
@@ -100,21 +100,26 @@ def create_maze(dim: int, s_e_pos: list) -> np.ndarray:
 
 
 def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
-    # Create a grid filled with walls
-    maze = np.full((dim * 2 + 1, dim * 2 + 1), '#')
 
     # Choose a random start and end position from the given list
     start, end = s_e_pos
 
+    # Increment the second element if it is 0
+    end_check = [end[0] + 1, end[1]] if end[0] == 0 else [end[0], end[1] + 1]
+
+    # Create a grid filled with walls
+    maze = np.full((dim * 2 + 1, dim * 2 + 1), '#')
+
     # Initialize the stack with the starting point and mark it as visited
     stack = [start]
-    visited = set([tuple(start)])
+    visited = {tuple(start)}
 
     # Define possible directions
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     maze[start[0], start[1]] = '.'
 
+    connection_to_end = False
     while len(stack) > 0:
         x, y = stack[-1]
 
@@ -123,28 +128,43 @@ def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
 
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
-            if 0 <= nx < dim and 0 <= ny < dim and (nx, ny) not in visited:
-                maze[2 * nx + 1, 2 * ny + 1] = '.'
-                maze[2 * x + 1 + dx, 2 * y + 1 + dy] = '.'
-                stack.append([nx, ny])
-                visited.add((nx, ny))
-                break
+            if 0 < nx < 2 * dim and 0 < ny < 2 * dim and (nx, ny) not in visited:
+                if dx == 0:
+                    # check if the front diagonals are part of a path and not a corner block
+                    go = maze[x + -1, y + dy] != "." and maze[x + 1, y + dy] != "." and \
+                         maze[nx + -1, ny + dy] != "." and maze[nx + 1, ny + dy] != "."
+                else:
+                    # check if the front diagonals are part of a path and not a corner block
+                    go = maze[x + dx, y + -1] != "." and maze[x + dx, y + 1] != "." and \
+                         maze[nx + dx, ny + -1] != "." and maze[nx + dx, ny + 1] != "."
+                if maze[x + 2 * dx, y + 2 * dy] != "." and go:
+                    maze[nx, ny] = '.'
+                    maze[x + dx, y + dy] = '.'
+                    stack.append([nx, ny])
+                    visited.add((nx, ny))
+                    # to ensure that the returned maze has a connection from start to end
+                    if [nx, ny] == end_check:
+                        connection_to_end = True
+                    break
         else:
             stack.pop()
 
+    if not connection_to_end:
+        maze = create_maze_rand_se(m_dim, s_e_pos)
+
     # Mark the start and end positions
-    maze[start[0], start[1]] = 'S'
-    maze[end[0], end[1]] = 'E'
+    maze[start[0], start[1]] = chr(9654)
+    maze[end[0], end[1]] = '■'
 
     return maze
 
 
-def find_path(maze: np.ndarray, s_e_pos: list) -> np.ndarray:
+def find_shortest_path(maze: np.ndarray, s_e_pos: list) -> np.ndarray:
     # BFS algorithm to find the shortest path
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     # add one to start in the maze if the position is 0 for start or end
-    s_e_pos[0] = [num + 1 if num == 0 else num for num in s_e_pos[0]]
-    s_e_pos[1] = [num - 2 if num == 0 else num for num in s_e_pos[1]]
+    # s_e_pos[0] = [num + 1 if num == 0 else num for num in s_e_pos[0]]
+    # s_e_pos[1] = [num - 2 if num == 0 else num for num in s_e_pos[1]]
 
     start = tuple(s_e_pos[0])
     end = tuple(s_e_pos[1])
@@ -172,6 +192,8 @@ def place_puzzle_letters(maze: np.ndarray, path: np.ndarray, num_letters: int) -
 
     random_pos = random.sample(path, num_letters)
 
+    #TODO: check einbauen, dass ende nicht als letter versehen werden kann
+
     for ind, pos in enumerate(random_pos):
         maze[pos] = random_letters[ind]
 
@@ -184,26 +206,42 @@ def write_maze(maze: np.ndarray, solution: str, s_e_pos: list, dim: int):
     for row in maze:
         maze_str.append(' '.join(row))
     maze_str = "\n".join(maze_str)
-    for letter in solution:
-        maze_str = maze_str.replace(f"{letter}", f"[y]{letter}[/y]")
+
     start = s_e_pos[0]
     end = s_e_pos[1]
-    maze_str[start[0], start[1]] = "S", "[g]S[/g]"
-    maze_str[end[0], end[1]] = "E", "[r]E[/r]"
+
+    # start_ind_replace = (start[1] + start[0] * (dim * 2 + 1)) * 2
+    # end_ind_replace = (end[1] + end[0] * (dim * 2 + 1)) * 2
+
+    for letter in solution:
+        maze_str = maze_str.replace(f"{letter}", f"[y]{letter}[/y]")
+    maze_str = maze_str.replace(f"{chr(9654)}", f"[g]{chr(9654)}[/g]")
+    maze_str = maze_str.replace(f"{'■'}", f"[r]{'■'}[/r]")
+
+    # change the start string S to "[g]S[/g]" at its index in the string
+    # maze_str = maze_str[:start_ind_replace] + "[g]S[/g]" + maze_str[start_ind_replace + 1:]
+    #
+    # if start_ind_replace > end_ind_replace:
+    #     maze_str = maze_str[:end_ind_replace] + "[r]E[/r]" + maze_str[end_ind_replace + 1:]
+    # else:
+    #     # account for the added symbols by replacing 'S' with "[g]S[/g]"
+    #     end_ind_replace += 7
+    #     maze_str = maze_str[:end_ind_replace] + "[r]E[/r]" + maze_str[end_ind_replace + 1:]
+
     write(maze_str, 0)
 
 
 if __name__ == "__main__":
-    m_dim = 4
+    m_dim = 16
 
     s_e_pos = random_start_end(m_dim)
 
     maze = create_maze_rand_se(m_dim, s_e_pos)
 
-    print(maze)
+    # print(maze)
 
-    path = find_path(maze, s_e_pos)
+    path = find_shortest_path(maze, s_e_pos)
 
     solution = place_puzzle_letters(maze, path, 12)
 
-    write_maze(maze, solution, m_dim)
+    write_maze(maze, solution, s_e_pos, m_dim)
