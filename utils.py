@@ -10,7 +10,7 @@ import shutil
 # ------------------------------------------- Global Values -----------------------------------------------------------
 
 # value changed through options function in main.py 0.015, for debugging set this to 0.00
-default_delay = 0.00
+default_delay = 0.000
 
 # ---------------------------------------- Classes and Structs ---------------------------------------------------------
 
@@ -173,7 +173,7 @@ def default_commands(inp: str, hints: list, hint_count: int, game) -> time:
     elif "o_h" in inp:
         old_hints = '\n'.join(game.get_hints_used())
         write(f"[y]{old_hints}[/y]\n")
-    elif "hi" in inp:
+    elif "hin" in inp:
         print_hint(hints[hint_count])
         game.set_hint_used(hints[hint_count])
         hint_count += 1 + len(game.get_hints_used(game.get_current_level()))

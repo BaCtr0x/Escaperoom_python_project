@@ -1,7 +1,7 @@
 import re
 
 from Game import *
-from utils import write, clear_console, change_typing_speed, cinput
+from utils import write, clear_console, change_typing_speed, cinput, default_commands
 from visuallize import show_stats
 
 
@@ -11,8 +11,11 @@ from visuallize import show_stats
 def launch_game() -> bool:
     clear_console()
 
+    # TODO hint eingeben, das 'help' immer funktioniert
+
+
     # create a game instance
-    name = cinput("What is you name?:\n")
+    name = cinput("What is your name?:\n")
     game = Game(name)
     clear_console()
 
@@ -32,6 +35,8 @@ def launch_game() -> bool:
 def load_game() -> bool:
     write("[b] Load a game [/b]")
     name = cinput("What is your name?\n")
+    if "exit" in name:
+        return False
     game = Game(name)
     game.load_game()
     return False
@@ -41,7 +46,8 @@ def load_game() -> bool:
 def options() -> bool:
     write("[b]Options[/b]\n", 0)
     write(
-        "If you want to change the typing speed enter a value between 0 and 10, where 10 is instant and 0 very slow. Otherwise type 'back'.\n",
+        "If you want to change the typing speed enter a value between 0 and 10, where 10 is instant and 0 very"
+        " slow. Otherwise type 'back'.\n",
         0)
     speed = cinput().lower()
     if speed == "back":
@@ -53,7 +59,9 @@ def options() -> bool:
     while True:
         write("Is this good? (y,n)\n", 0)
         ans = cinput().lower()
-        if ans == "y":
+        if ans == "y" or ans == "yes":
+            return False
+        elif "ex" in ans:
             return False
         else:
             write("Please enter a new value: \n", 0)
@@ -63,7 +71,8 @@ def options() -> bool:
 
 
 def exit_game():
-    # TODO: check if unsaved information is still running, save them end the programm
+    # TODO: check if unsaved information is still running, save them end the programm,
+    #  i think we dont need this function anymore
     return True
 
 

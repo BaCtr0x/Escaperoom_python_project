@@ -7,7 +7,21 @@ from queue import Queue
 import string
 import math
 
-from utils import cinput, write, clear_console
+from utils import cinput, write, clear_console, default_commands
+
+# list of hints for the user
+hints = [
+    f"The start point is '[g]{chr(9654)}[/g]' and the end is '[r]■[/r]'.",
+    "Follow the path and see what you can find.",
+    "The letters don't seem to have a meaning, but does it matter?",
+    "Entering the letters in the encountered order might do the trick."
+]
+
+# dimension of the maze (will be doubled later)
+m_dim = 22
+
+# number of letters of the solution word
+sol_len = 12
 
 
 # Helper function for the random_star_end function to calculate the distance between two points
@@ -100,7 +114,6 @@ def create_maze(dim: int, s_e_pos: list) -> np.ndarray:
 
 
 def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
-
     # Choose a random start and end position from the given list
     start, end = s_e_pos
 
@@ -192,15 +205,13 @@ def place_puzzle_letters(maze: np.ndarray, path: np.ndarray, num_letters: int) -
 
     random_pos = random.sample(path, num_letters)
 
-    #TODO: check einbauen, dass ende nicht als letter versehen werden kann
-
     for ind, pos in enumerate(random_pos):
         maze[pos] = random_letters[ind]
 
     return ''.join(random_letters)
 
 
-def write_maze(maze: np.ndarray, solution: str, s_e_pos: list, dim: int):
+def maze_to_string(maze: np.ndarray, solution: str, s_e_pos: list) -> str:
     # Print the resulting maze
     maze_str = []
     for row in maze:
@@ -218,19 +229,68 @@ def write_maze(maze: np.ndarray, solution: str, s_e_pos: list, dim: int):
     maze_str = maze_str.replace(f"{chr(9654)}", f"[g]{chr(9654)}[/g]")
     maze_str = maze_str.replace(f"{'■'}", f"[r]{'■'}[/r]")
 
-    # change the start string S to "[g]S[/g]" at its index in the string
-    # maze_str = maze_str[:start_ind_replace] + "[g]S[/g]" + maze_str[start_ind_replace + 1:]
-    #
-    # if start_ind_replace > end_ind_replace:
-    #     maze_str = maze_str[:end_ind_replace] + "[r]E[/r]" + maze_str[end_ind_replace + 1:]
-    # else:
-    #     # account for the added symbols by replacing 'S' with "[g]S[/g]"
-    #     end_ind_replace += 7
-    #     maze_str = maze_str[:end_ind_replace] + "[r]E[/r]" + maze_str[end_ind_replace + 1:]
+    return maze_str
+
+
+def write_maze(maze: np.ndarray, solution: str, s_e_pos: list):
+    maze_str = maze_to_string(maze, solution, s_e_pos)
 
     write(maze_str, 0)
 
 
+def maze_puzzle(game) -> time:
+    write("Hier kommt die neue Raumbeschreibung und was passieren wird :D")
+    hint_count = len(game.get_hints_used(game.get_current_level()))
+    level_state = game.get_level_state()
+
+    # checks whether the game has been loaded or not and correspondingly creates a maze or takes the old one
+    if level_state == {}:
+
+        s_e_pos = random_start_end(m_dim)
+
+        maze = create_maze_rand_se(m_dim, s_e_pos)
+
+        path = find_shortest_path(maze, s_e_pos)
+
+        solution = place_puzzle_letters(maze, path, sol_len)
+
+        state = {
+            "maze": maze_to_string(maze, solution, s_e_pos),
+            "solution": solution
+        }
+
+        game.set_level_state(state)
+
+        write_maze(maze, solution, s_e_pos)
+    else:
+        maze = level_state["maze"]
+        solution = level_state["solution"]
+        write(maze, 0)
+
+    start = time.time()
+
+    # set solution to lowercase
+    solution = solution.lower()
+
+    # use input loop
+    while True:
+        ans = cinput("What do you set the stone tires to?\n").replace(" ", "").lower()
+        if ans == solution:
+            stop = time.time()
+            write("Here goes the description of what happens next")
+
+            return round(stop - start, 2), hints[:hint_count], 0
+        elif "ex" in ans or "hi" in ans or "he" in ans or "_" in ans:
+            stop = default_commands(ans, hints, hint_count, game)
+            if stop != 0:
+                return round(stop - start, 2), hints[:hint_count], 1
+        elif "olaf" in ans:
+            write(solution, 0)
+        else:
+            write("Nothing seems to happen, maybe the order is not correct yet.")
+
+
+# just for debugging
 if __name__ == "__main__":
     m_dim = 16
 

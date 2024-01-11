@@ -1,12 +1,14 @@
 from cesar_puzzle import cesar_puzzle
 from logic_puzzle import logic_puzzle
+from maze_puzzle import maze_puzzle
 
 from utils import *
 
 # This acts like an interface, here are all the levels that are playable
 levels = {
     0: logic_puzzle,
-    1: cesar_puzzle
+    1: maze_puzzle,
+    2: cesar_puzzle
 }
 
 default_filename = 'game_data.json'
@@ -41,6 +43,10 @@ class Game:
         self._levels_completed = {}
         self._hints_used = {}
         self._unique_identifier = self.generate_unique_identifier()
+        self._level_state = {}
+        for level in levels.values():
+            name = str(level).split(" ")[1].split(" ")[0]
+            self._level_state[name] = {}
 
     def __get_level_name(self, level_ind=-1) -> str:
         if level_ind == -1:
@@ -64,6 +70,14 @@ class Game:
             return self._hints_used[self.__get_level_name(level_ind)]
         except KeyError:
             return []
+
+    def set_level_state(self, state: {}):
+        name = str(levels[self._current_level]).split(" ")[1].split(" ")[0]
+        self._level_state[name] = state
+
+    def get_level_state(self):
+        name = str(levels[self._current_level]).split(" ")[1].split(" ")[0]
+        return self._level_state[name]
 
     def set_hint_used(self, hint: str):
         level = self.__get_level_name()
@@ -89,7 +103,8 @@ class Game:
             'player_name': self._player_name,
             'current_level': self._current_level,
             'levels_completed': self._levels_completed,
-            'hints_used': self._hints_used
+            'hints_used': self._hints_used,
+            'level_state': self._level_state
         }
 
         if os.path.exists(filename):
@@ -123,7 +138,6 @@ class Game:
             write("You entered something else, we will move you to the main menu :)\n")
             return 1
 
-    # TODO: make sure that the time stored is added to the time it is measuring after continue playing
     def load_game(self, filename=default_filename):
         if not os.path.exists(filename):
             write("[b]No[/b] game has been played yet.", 0)
@@ -166,6 +180,7 @@ class Game:
                     self._levels_completed = game_data["levels_completed"]
                     self._hints_used = game_data["hints_used"]
                     self._unique_identifier = games[inp]
+                    self._level_state = game_data["level_state"]
                     clear_console()
                     # start the game after loading the values
                     self.play()
