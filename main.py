@@ -42,32 +42,46 @@ def load_game() -> bool:
     return False
 
 
-# TODO: add the ability to delete save state :D
-def options() -> bool:
-    write("[b]Options[/b]\n", 0)
-    write(
-        "If you want to change the typing speed enter a value between 0 and 10, where 10 is instant and 0 very"
-        " slow. Otherwise type 'back'.\n",
-        0)
-    speed = cinput().lower()
-    if speed == "back":
-        return False
-    else:
-        change_typing_speed(speed)
-    write("This is an example to show you the typing speed you entered.\n")
+# TODO: add the ability to delete save state :D am besten über ein Menu mit 1. writing speed, 2. delete specific state,
+#  3. delete all
 
+def show_option_menu(clear=False):
+    if clear:
+        clear_console()
+
+    write("[b]Options[/b]\n", 0)
+
+    write("1. Change writing speed\n"
+          "2. Delete a specific save state\n"
+          "3. Delete all save states\n"
+          "4. Exit", 0)
+
+
+def options() -> bool:
+    options_func = {
+        1: change_typing_speed,
+        3: delete_all_safe_states
+    }
+    show_option_menu(True)
+    op = cinput("What do you want to do?\n").lower()
     while True:
-        write("Is this good? (y,n)\n", 0)
-        ans = cinput().lower()
-        if ans == "y" or ans == "yes":
-            return False
-        elif "ex" in ans:
-            return False
-        else:
-            write("Please enter a new value: \n", 0)
-            speed = cinput().lower()
-            change_typing_speed(speed)
-            write("This is an example to show you the typing speed you entered.\n")
+        try:
+            op = int(op)
+        except ValueError:
+            if "change" in op:
+                op = 1
+            elif "specific" in op:
+                op = 2
+            elif "all" in op:
+                op = 3
+            elif "ex" in op:
+                return False
+        try:
+            options_func[op]()
+            show_option_menu(True)
+            op = cinput("What do you want to do\n")
+        except KeyError:
+            op = cinput("Please enter a valid number or operation name.\n")
 
 
 def exit_game():
@@ -105,14 +119,15 @@ def main_menu():
     bexit = False
     while not bexit:
         if run == 0:
-            write("[b]Main menu[/b]\n", 0)
-            write("1. Play game \n", 0)
-            write("2. Load Game \n", 0)
-            write("3. Show stats \n", 0)
-            write("4. Options \n", 0)
-            write("5. Exit game\n", 0)
-            write("You can always type 'help', to see what you can do.\n", 0)
-
+            write("[b]Main menu[/b]\n"
+                  "1. Play game \n"
+                  "2. Load Game \n"
+                  "3. Show stats \n"
+                  "4. Options \n"
+                  "5. Exit game\n"
+                  "\n\n You can navigate the menus by either entering the corresponding number or typing the name of "
+                  "the operation you want to select. \n\n"
+                  "You can always type 'help', to see what you can do.\n", 0)
             user_inp = main_menu_selection(cinput("What do you want to do?\n"))
         if user_inp != -1:
             clear_console()

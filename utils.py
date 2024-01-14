@@ -30,9 +30,38 @@ TAG_COLORS = {
 
 # ----------------------------------------- Utility Functions ----------------------------------------------------------
 
+# delete all the save states
+def delete_all_safe_states():
+    clear_console()
+    write("So you want to delete all safe states?\n", 0)
+    ans = cinput("Please confirm your answer with 'yes' or 'no'\n")
+    while True:
+        if "y" in ans:
+            ans = cinput("Are you sure? (y,n)\n")
+            if "y" in ans:
+                filename = 'game_data.json'
+                existing_data = {}
+
+                # Step 3: Write the modified data back to the file
+                with open(filename, 'w') as file:
+                    json.dump(existing_data, file, indent=4)
+                write("[b][r]All safe states have been deleted![/r][/b]")
+                inp = cinput("Press enter to go back to the options menu.\n")
+                return False
+            else:
+                return False
+        else:
+            return False
+
+
+def delete_specific_safe_state():
+    write("[b]Options[\b]\n"
+          "So you want to [b]delete[\b] a specific safe state.\n")
+    name = cinput("Please enter a player name of which you want to delete a safe state.\n")
+    # TODO finish this
 
 # A simple function to change the typing speed of the write function
-def change_typing_speed(speed: str):
+def change_typing_speed():
     # we need to get the global default_delay to change it here
     global default_delay
 
@@ -50,11 +79,31 @@ def change_typing_speed(speed: str):
         9: 0.015,
         10: 0.0
     }
-    try:
-        speed = int(speed)
-        default_delay = speed_dic[speed]
-    except ValueError:
-        print("Please enter a number between 0 and 10.")
+    clear_console()
+    write("[b]Change writing speed[/b]\n\n"
+          "So you want to change the speed of which the text is displayed.\n", 0)
+
+    speed = cinput("Please enter a number between 0 and 10, where 0 is very slow and instantaneous.\n")
+
+    while True:
+        try:
+            speed = int(speed)
+            default_delay = speed_dic[speed]
+            write("This is an example to show you the typing speed you entered.\n")
+            speed = cinput("Is this good? (y,n)\n").lower()
+        except ValueError:
+            if "ex" in speed:
+                return False
+            else:
+                speed = cinput("Please enter a number between 0 and 10.")
+
+        if speed == "y" or speed == "yes":
+            return False
+        elif "ex" in speed:
+            return False
+        else:
+            write("Please enter a new value: \n", 0)
+            speed = cinput().lower()
 
 
 def get_terminal_width() -> int:
@@ -158,7 +207,8 @@ def print_hint(hint: str):
 # This function centers the input prompt to fit the centering of the write function
 def cinput(prompt=""):
     padding = (get_terminal_width() - len(prompt)) // 2
-    input_text = input(' ' * padding + prompt)
+    cursor_padding = get_terminal_width() // 2
+    input_text = input(' ' * padding + prompt + ' ' * cursor_padding)
     return input_text
 
 

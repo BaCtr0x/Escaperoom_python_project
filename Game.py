@@ -87,7 +87,7 @@ class Game:
             self._hints_used[level].append(hint)
 
     def generate_unique_identifier(self) -> str:
-        return f"{self._player_name}_{get_date()}"
+        return f"{self._player_name.lower()}_{get_date()}"
 
     def complete_level(self, level: str, time_taken: time, hints_used: list):
         if level in self._levels_completed.keys():
@@ -144,7 +144,7 @@ class Game:
         else:
             with open(filename, 'r') as json_file:
                 stored_games = json.load(json_file)
-                games = [elem for elem in stored_games.keys() if self._player_name in elem]
+                games = [elem for elem in stored_games.keys() if self._player_name.lower() in elem]
 
                 if len(games) > 0:
                     loadable_games = list(filter(lambda key: stored_games[key]['current_level'] != len(levels.keys()),
@@ -161,7 +161,7 @@ class Game:
 
                     # remove all the games that are completed
                     # writes all the possible games to load with the given name
-                    for game, ind in enumerate(loadable_games):
+                    for ind, game in enumerate(loadable_games):
                         write(f"{ind}. {game}", 0)
 
                     inp = cinput("Which game do you want to load (number)?\n")
