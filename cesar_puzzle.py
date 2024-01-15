@@ -1,3 +1,4 @@
+import random
 import time
 from utils import write, cinput, default_commands
 from Game import *
@@ -67,7 +68,26 @@ def cesar_puzzle(game) -> time:
         "There is a small lever disguised as a dagger that was plunged into my chest. \n"
         "If you remove it a door will open, follow the path behind it. \n"
         "Good luck!\n")
-    enc_note = cesar_enc(14, note)
+
+    hint_count = len(game.get_hints_used(game.get_current_level()))
+    level_state = game.get_level_state()
+
+    if level_state == {}:
+        # Could also be between 0 and 24, but 0 and 26 are boring as nothing happens, so we create a small buffer of 3
+        key = random.randint(3, 23)
+        enc_note = cesar_enc(key, note)
+
+        state = {
+            "solution": key,
+            "cypher": enc_note
+        }
+
+        game.set_level_state(state)
+    else:
+        # load information from save state
+        key = level_state["solution"]
+        enc_note = level_state["cypher"]
+
     write("You enter the next room. Its dark and the air is filled with the smell of laurel wrath and grapes. \n"
           "A marmor recliner stands in the center, a red thick blanket on top. At the other end of the recliner rests\n"
           "a comfortable looking pillow of red velvet with a note on top of it. With slightly trembling fingers you \n"
@@ -80,8 +100,6 @@ def cesar_puzzle(game) -> time:
           "Maybe you can use the machine by writing 'encrypt: text' or 'decrypt: key'.\n")
 
     ans = ""
-
-    hint_count = len(game.get_hints_used(game.get_current_level()))
     # start timer
     start = time.time()
 
@@ -89,11 +107,11 @@ def cesar_puzzle(game) -> time:
         ans = cinput("What do you want to do?:\n")
         if "encrypt" in ans:
             plaintext = ans.split(":")[1]
-            print(f"{cesar_enc(14, plaintext)}\n")
+            print(f"{cesar_enc(key, plaintext)}\n")
         elif "decrypt" in ans:
             inp = ans.split(":")[1]
             key = int(inp)
-            if key == 14:
+            if key == key:
                 write(f"{note}\n")
             else:
                 write(cesar_dec(key, enc_note))
@@ -115,4 +133,3 @@ def cesar_puzzle(game) -> time:
           "shudder runs down you spine.\n")
 
     return round(stop - start, 2), hints[:hint_count], 0
-

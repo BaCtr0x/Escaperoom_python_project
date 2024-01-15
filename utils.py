@@ -6,6 +6,7 @@ import os
 import json
 from datetime import datetime
 import shutil
+from tabulate import tabulate
 
 # ------------------------------------------- Global Values -----------------------------------------------------------
 
@@ -24,11 +25,43 @@ TAG_COLORS = {
     'y': '93',  # Yellow
     'p': '95',  # Purple
     'c': '96',  # Cyan
-    'lp': '94'  # Light purple
+    'lp': '94',  # Light purple
+    'o': '33',  # Orange
+    'bl': '34'  #blue
 }
 
 
 # ----------------------------------------- Utility Functions ----------------------------------------------------------
+
+# a function to display stored games in a tabular manner
+def display_games(stored_games: dict, displayable_games: list):
+    headers = ["Index", "Name", "Date", "Time", "Current level", "Used hints"]
+
+    info_mat = []
+    for ind, game in enumerate(displayable_games):
+        game_dic = stored_games[game]
+        current_level = game_dic["current_level"]
+
+        try:
+            hints_used = len(game_dic["hints_used"].keys()[current_level])
+        except TypeError:
+            hints_used = 0
+
+        game_list = game.split("_")
+        name = game_dic["player_name"]
+        date = game_list[1]
+        time = game_list[2]
+
+        row = [f"{ind}.", name, date, time, current_level, hints_used]
+
+        info_mat.append(row)
+
+    sorted_info = sorted(info_mat, key=lambda x: (x[2], x[3]))
+    for s_ind in range(len(sorted_info)):
+        sorted_info[s_ind][0] = f"{s_ind}."
+    # index noch überschreiben mit neuem
+    write(f"{tabulate(sorted_info, headers=headers, tablefmt='pretty')}\n \n \n", 0)
+
 
 # delete all the save states
 def delete_all_safe_states():
@@ -55,9 +88,47 @@ def delete_all_safe_states():
 
 
 def delete_specific_safe_state():
-    write("[b]Options[\b]\n"
-          "So you want to [b]delete[\b] a specific safe state.\n")
-    name = cinput("Please enter a player name of which you want to delete a safe state.\n")
+    filename = 'game_data.json'
+    write("[b]Options[/b]\n"
+          "So you want to [b]delete[/b] a specific safe state.\n")
+    name = cinput("Please enter a player name of which you want to delete a safe state.\n").lower()
+
+    if not os.path.exists(filename):
+        write("[b]No[/b] game has been played yet.", 0)
+    else:
+        with open(filename, 'r') as json_file:
+            stored_games = json.load(json_file)
+        games = [elem for elem in stored_games.keys() if name in elem.lower()]
+        if len(games) == 0:
+            write("It seems that there are no save games with the entered player name :(\n", 0)
+            ans = cinput("Did you misspell or want to delete a different save state? (y,n)\n")
+            if "y" in ans:
+                delete_specific_safe_state()
+            else:
+                return False
+        else:
+            display_games(stored_games, games)
+            ans = cinput("Which save state do you want to delete? Please enter the index number.\n").replace(".", "")
+            while True:
+                if "ex" in ans:
+                    return False
+                try:
+                    ans = int(ans)
+                    # Sorting based on date and time
+                    sorted_info = sorted(games, key=lambda x: (x.split('_')[1], x.split('_')[2]))
+                    del_key = sorted_info[ans]
+                    write(f"You are about to delete {del_key}.\n")
+                    ans = cinput("Are you sure you want to delete it? (y,n)\n")
+                    if "y" in ans:
+                        del stored_games[del_key]
+
+                        # Write the modified data back to the file
+                        with open(filename, 'w') as json_file:
+                            json.dump(stored_games, json_file, indent=4)
+                        cinput(f"{del_key} has been successfully deleted. Press enter to continue.\n")
+                    return False
+                except ValueError:
+                    ans = cinput(f"Please select a number between 0 and {len(games) - 1}.\n")
     # TODO finish this
 
 # A simple function to change the typing speed of the write function
@@ -169,7 +240,7 @@ def write(text: str, delay=None):
                 tag = ''
             elif char == ']' and in_tag:
                 in_tag = False
-                if tag in ['b', 'it', 'r', 'g', 'y', 'p', 'c', 'lp']:
+                if tag in ['b', 'it', 'r', 'g', 'y', 'p', 'c', 'lp', 'o', 'bl']:
                     sys.stdout.write(f'\033[{TAG_COLORS[tag]}m')
                 elif is_closing_tag(tag):
                     sys.stdout.write('\033[0m')  # End special case

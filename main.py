@@ -60,6 +60,7 @@ def show_option_menu(clear=False):
 def options() -> bool:
     options_func = {
         1: change_typing_speed,
+        2: delete_specific_safe_state,
         3: delete_all_safe_states
     }
     show_option_menu(True)

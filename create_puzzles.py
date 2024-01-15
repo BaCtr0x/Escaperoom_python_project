@@ -1,6 +1,7 @@
 from Puzzle import *
 
 
+# War ne Idee, aber aufwändig und keine Zeit für
 def create_puzzles(game) -> list:
     logic_puzzle = Puzzle(
         "logic_puzzle",
@@ -47,5 +48,3 @@ def create_puzzles(game) -> list:
         "smell is old and musty and you get the feeling that this won't be such a simple case, as you \n"
         "continue on.\n"
     )
-
-

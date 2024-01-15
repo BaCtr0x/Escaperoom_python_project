@@ -1,14 +1,16 @@
 from cesar_puzzle import cesar_puzzle
 from logic_puzzle import logic_puzzle
 from maze_puzzle import maze_puzzle
+from image_puzzle import image_puzzle
 
 from utils import *
 
 # This acts like an interface, here are all the levels that are playable
 levels = {
-    0: logic_puzzle,
-    1: maze_puzzle,
-    2: cesar_puzzle
+    0: image_puzzle,
+    1: logic_puzzle,
+    2: maze_puzzle,
+    3: cesar_puzzle
 }
 
 default_filename = 'game_data.json'
@@ -144,7 +146,7 @@ class Game:
         else:
             with open(filename, 'r') as json_file:
                 stored_games = json.load(json_file)
-                games = [elem for elem in stored_games.keys() if self._player_name.lower() in elem]
+                games = [elem for elem in stored_games.keys() if self._player_name.lower() in elem.lower()]
 
                 if len(games) > 0:
                     loadable_games = list(filter(lambda key: stored_games[key]['current_level'] != len(levels.keys()),
@@ -159,21 +161,19 @@ class Game:
                         else:
                             return
 
-                    # remove all the games that are completed
-                    # writes all the possible games to load with the given name
-                    for ind, game in enumerate(loadable_games):
-                        write(f"{ind}. {game}", 0)
+                    # displays the games that are loadable in a tabular manner
+                    display_games(stored_games, loadable_games)
 
-                    inp = cinput("Which game do you want to load (number)?\n")
+                    inp = cinput("Which game do you want to load (Index)?\n")
                     # Error handling if the user input is not a number
                     while True:
-                        if inp == "exit":
+                        if "ex" in inp:
                             return
                         try:
                             inp = int(inp)
                             break
                         except ValueError:
-                            inp = cinput("Please enter just the number corresponding to the save you want to load.\n")
+                            inp = cinput("Please enter just the index number for the save you want to load.\n")
                     game_data = stored_games[loadable_games[inp]]
                     self._player_name = game_data["player_name"]
                     self._current_level = game_data["current_level"]

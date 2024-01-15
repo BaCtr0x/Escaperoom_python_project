@@ -2,7 +2,8 @@ import time
 import re
 from utils import write, cinput, default_commands
 
-# TODO: Muss noch fertig gestellt werden und Klassen für logic und cipher puzzle erstellen
+
+# TODO: Muss noch fertig gestellt werden und Klassen für logic und cipher puzzle erstellen, wahrscheinlich keine Zeit für
 class Puzzle:
     def __init__(self, puzzle_name: str, game, hints: list, answers: list, intro: str, outro: str, error_messages: list,
                  input_formats: list, hint_count=0, solving_time=0):
@@ -94,4 +95,3 @@ class Puzzle:
         else:
             write(f"Your answer does not match the input format of {self._input_formats[0]}")
             return False
-
