@@ -20,6 +20,7 @@ default_filename = 'game_data.json'
 # It also is the heart of the game containing all functions needed, such as play, save_game and load_game
 def write_main_story():
     write(
+        "[b]The beginning[/b]"
         "You wake up slowly. The comfort of your dreams vanishes into mist and you feel the cold air of the room\n"
         "brush against your skin. You pull up your blanket and wrap yourself back up to avoid the cold harsh outside\n"
         "world. The old room made of dark wood shines gloomily in the white light of the sun pushing through the\n"
@@ -160,11 +161,14 @@ class Game:
 
     def play(self) -> int:
         while self._current_level < len(levels.keys()):
+            write(f"[b]Room {self._current_level}[/b]")
             level_time, ex = levels[self._current_level](self)
             if ex == 1:
                 return 1
             level_name = str(levels[self._current_level]).split("at")[0].split(" ")[1]
             self.complete_level(level_name, level_time)
+            cinput("Press enter to continue.\n")
+            clear_console()
         write_story_ending()
         write("[b]Thanks for playing our game, we hope you enjoyed it :)[/b]\n")
         inp = cinput("Do you want to go back to the main menu (1) or exit the game (2)?\n")

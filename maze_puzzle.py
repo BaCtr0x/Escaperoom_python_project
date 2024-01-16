@@ -235,12 +235,21 @@ def maze_to_string(maze: np.ndarray, solution: str, s_e_pos: list) -> str:
 def write_maze(maze: np.ndarray, solution: str, s_e_pos: list):
     maze_str = maze_to_string(maze, solution, s_e_pos)
 
-    write(maze_str, 0)
+    write(maze_str)
 
 
 def maze_puzzle(game) -> time:
     hint_count = len(game.get_hints_used(game.get_current_level()))
     level_state = game.get_level_state()
+
+    write("\nYou enter the well lit room. The warm light of the four torches that are placed on top of a fence about\n"
+          "5 meters in front of you, covers everything in its orange flickering colour and lets the shadows of the \n"
+          "room dance with every breeze. The air is fresh and cold. And as you make a few steps towards the fence you\n"
+          "realise that you are standing on some kind of balcony hanging over a huge hall that was carved into the\n"
+          "mountain. The hall is split into uncountably many path by walls at least 3 meters in height. Cold air \n"
+          "rushes up from down under and you start to shiver. You concentrate and take in the hole view, just to\n"
+          "realize that you are looking at a giant maze.\n"
+         )
 
     # checks whether the game has been loaded or not and correspondingly creates a maze or takes the old one
     if level_state == {}:
@@ -264,30 +273,25 @@ def maze_puzzle(game) -> time:
     else:
         maze = level_state["maze"]
         solution = level_state["solution"]
-        write(maze, 0)
+        write(maze)
+
+    write(
+        f"\nYou take a look around, you see {sol_len} stone wheels set into the left wall, all set to random letters.\n"
+        "A few questions immediately rush through your head: 'What is the connection?', 'Who would build something\n"
+        "like this' and what am I supposed to do?\n\n"
+    )
 
     start = time.time()
 
     # set solution to lowercase
     solution = solution.lower()
 
-    write("You enter the well lit room. The warm light of the four torches that are placed on top of a fence about\n"
-          "5 meters in front of you, covers everything in its orange flickering colour and lets the shadows of the \n"
-          "room dance with every breeze. The air is fresh and cold. And as you make a few steps towards the fence you\n"
-          "realise that you are standing on some kind of balcony hanging over a huge hall that was carved into the\n"
-          "mountain. The hall is split into uncountably many path by walls at least 3 meters in height. Cold air \n"
-          "rushes up from down under and you start to shiver. You concentrate and take in the hole view, just to\n"
-          "realize that you are looking at a giant maze.\n"
-          f"You take a look around, you see {sol_len} stone wheels set into the left wall, all set to random letters.\n"
-          "A few questions immediately rush through your head: 'What is the connection?', 'Who would build something\n"
-          "like this' and what am I supposed to do?\n")
-
     # use input loop
     while True:
         ans = cinput("What do you set the stone tires to?\n").replace(" ", "").replace(",", "").lower()
         if ans == solution:
             stop = time.time()
-            write("As you enter the random letters you hear a dark rumble coming from above, like the grinding of \n"
+            write("\nAs you enter the random letters you hear a dark rumble coming from above, like the grinding of \n"
                   "stone on stone, mixed with the mechanical clicking of ginormous gear wheels.\n"
                   "Your eyes jump back to the cavern in which you examined the maze and see part of the ceiling\n"
                   "descending to the ground. With a loud thump it stops exactly at the height of you platform.\n"
@@ -309,7 +313,7 @@ def maze_puzzle(game) -> time:
         elif "olaf" in ans:
             write(solution, 0)
         else:
-            write("Nothing seems to happen, maybe the order is not correct yet.\n")
+            write("\nNothing seems to happen, maybe the order is not correct yet.\n")
 
 
 # just for debugging

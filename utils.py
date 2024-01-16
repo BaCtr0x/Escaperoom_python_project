@@ -13,7 +13,7 @@ from tabulate import tabulate
 # value changed through options function in main.py 0.015, for debugging set this to 0.00
 default_delay = 0.015
 # change the speed at which the menu elements are displayed
-menu_delay = 0.00000
+menu_delay = 0.0075
 
 # ---------------------------------------- Classes and Structs ---------------------------------------------------------
 
@@ -159,9 +159,9 @@ def change_typing_speed():
         4: 0.02,
         5: 0.015,
         6: 0.0125,
-        7: 0.0010,
-        8: 0.00075,
-        9: 0.00050,
+        7: 0.010,
+        8: 0.0075,
+        9: 0.0050,
         10: 0.0000
     }
     clear_console()
@@ -175,7 +175,7 @@ def change_typing_speed():
         try:
             speed = int(speed)
             default_delay = speed_dic[speed]
-            write("This is an example to show you the typing speed you entered.\n", menu_delay)
+            write("This is an example to show you the typing speed you entered.\n")
             speed = cinput("Is this good? (y,n)\n").lower()
         except ValueError:
             if "ex" in speed:
@@ -301,7 +301,7 @@ def cinput(prompt=""):
     if prompt == "":
         input_text = input(' ' * cursor_padding)
     else:
-        input_text = input(' ' * padding + prompt + ' ' * cursor_padding)
+        input_text = input('\033[94m' + ' ' * padding + prompt + ' ' * cursor_padding + '\033[0m')
     return input_text
 
 
@@ -318,7 +318,7 @@ def default_commands(inp: str, hints: list, hint_count: int, game):
     elif "o_h" in inp:
         old_hints = '\n'.join(game.get_hints_used())
         write(f"[y]{old_hints}[/y]\n")
-    elif "hint" in inp:
+    elif "hint" in inp and not "o_h" in inp:
         print_hint(hints[hint_count])
         game.set_hint_used(hints[hint_count])
 

@@ -14,7 +14,7 @@ def play_puzzle(game):
         "the warm room before. You look around with the cone of white light coming from your flashlight and walk\n"
         "further into the room. A bright flash blinds you and you immediately take a step back as a large image hovers\n"
         "on the wall opposite of you. In crackly chiseled letters you read a simple question below the image:\n"
-        "[b]What is the dominant colour of this image?[/b]\n\n"
+        "[p]What is the dominant colour of this image?[/p]\n\n"
         "Hammer and chisel lie slightly to the right of the question on the floor, dusted in stone powder, as if they\n"
         "have been used recently.\n"
     )
@@ -78,7 +78,7 @@ def play_puzzle(game):
             plt.show()
 
             # print(f"Gut gemacht! Die gesuchte dominante Farbe ist {colour}.\nDu kannst nun den nächsten Raum betreten.")
-            write(f"As you enter the {colour} you see another image appear beside the original one. A simple square\n"
+            write(f"\nAs you enter {colour} you see another image appear beside the original one. A simple square\n"
                   "the colour of your answer. Shortly after that they both start to flicker and vanish, leaving a\n"
                   "dark hole in the wall. Spiderwebs hang across the small dark corridor. One by one your see torches\n"
                   "bursting to light, illuminating the staircase that spirals down deeper into the mountain. Each step\n"
@@ -95,7 +95,7 @@ def play_puzzle(game):
         else:
             # write ist wie print, nur mit einem schreib Effekt.
             write(
-                f"The room shakes gloomily as you enter {colour}. You get the feeling that this was not the answer.\n")
+                f"\nThe room shakes gloomily as you enter {colour}. You get the feeling that this was not the answer.\n")
 
     # Dieser Code wird nur erreicht, wenn die Schleife dreimal durchlaufen wurde und die richtige Farbe nicht gefunden
     # wurde.
@@ -105,7 +105,7 @@ def play_puzzle(game):
         # save the game as you died
         game.save_game()
         write(
-            "You enter your third guess as feel the ground start to rumble under your feet. Dust starts to fall from\n"
+            "\nYou enter your third guess as feel the ground start to rumble under your feet. Dust starts to fall from\n"
             "the ceiling and into your face. It burns in your eyes and you revolt back. A thunderous bang rolls\n"
             "over you from the wall behind you. You spin around and see the door shut. You run over, trying to push\n"
             "open the door. Pulling and pressing as hard as you can, but the damn door wont budge an inch. You feel\n"

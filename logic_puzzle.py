@@ -51,7 +51,7 @@ def logic_puzzle(game) -> time:
         ans = cinput("Which order do you choose? 'a,b,c,d'\n").replace(" ", "")
         if ans == solution:
             stop = time.time()
-            write("You move the symbols around and with a quite 'click' they lock in place. The fireplace instantly \n"
+            write("\nYou move the symbols around and with a quite 'click' they lock in place. The fireplace instantly \n"
                   "extinguishes. And with the sound of splitting wood, you see in the flickering light of your candle\n"
                   "a door forming in the wall. You push your fingers behind the small gap that appeared, the slight\n"
                   "pain of a small splinter that gets stuck in your index finger lets you revolt shortly. But you\n"

@@ -367,7 +367,8 @@ def score_board(games: dict):
 
     # Print the scoreboard using the tabulate library
     clear_console()
-    write(f"{tabulate(rows, headers=headers, tablefmt='pretty')}\n \n \n", menu_delay)
+    write("[b]Score Board[/b]\n\n")
+    write(f"{tabulate(rows, headers=headers, tablefmt='pretty')}\n \n \n", 0.0050)
     inp = cinput("If you want to close the score board, press enter\n")
     clear_console()
 
@@ -375,7 +376,8 @@ def score_board(games: dict):
 def show_menu(clear=False):
     if clear:
         clear_console()
-    write("1. Times plot of all players\n"
+    write("[b] Statistics [/b]\n\n"
+          "1. Times plot of all players\n"
           "2. Times plot of specific player\n"
           "3. Hints plot of all players\n"
           "4. Hints plot of specific player\n"
@@ -388,7 +390,6 @@ def show_menu(clear=False):
 # This function handles the general functionality of the show stats section, allowing to call different functions
 # via a dictionary as an interface, which makes the function calling more dynamic
 def show_stats() -> bool:
-    write("[b] Statistics [/b]", menu_delay)
     filename = 'game_data.json'
     stored_games = {}
     with open(filename, 'r') as json_file:
