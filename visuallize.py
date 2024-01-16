@@ -4,7 +4,7 @@ import pandas as pd
 import json
 from tabulate import tabulate
 
-from utils import write, cinput, clear_console
+from utils import write, cinput, clear_console, menu_delay
 
 
 def get_games_with_completed_levels(games: dict) -> dict:
@@ -126,8 +126,8 @@ def filter_dict_by_name(games: dict, name: str) -> dict:
         names = list({value["player_name"] for key, value in games.items()})
 
         write("The player you entered has not played a game yet, with at least one completed level.\n"
-              "These are the players that have done so:\n", 0)
-        [write(f"{ind}. {name}") for ind, name in enumerate(names)]
+              "These are the players that have done so:\n", menu_delay)
+        [write(f"{ind}. {name}", menu_delay) for ind, name in enumerate(names)]
         inp = cinput("Did you mean one of them? Please select a number or type no.\n").replace(".", "").replace(" ", "")
 
         # Handle user input
@@ -367,7 +367,7 @@ def score_board(games: dict):
 
     # Print the scoreboard using the tabulate library
     clear_console()
-    write(f"{tabulate(rows, headers=headers, tablefmt='pretty')}\n \n \n", 0)
+    write(f"{tabulate(rows, headers=headers, tablefmt='pretty')}\n \n \n", menu_delay)
     inp = cinput("If you want to close the score board, press enter\n")
     clear_console()
 
@@ -382,14 +382,13 @@ def show_menu(clear=False):
           "5. Plot times and hints all players\n"
           "6. Plot times and hints of specific player\n"
           "7. Score board\n"
-          "8. exit")
+          "8. exit", menu_delay)
 
 
-# TODO: this needs to be filled.
-#  Maybe write functions for time by name showing the different times for each level by a given name and others
-#  and access them through a dictionary, like the main menu management. The functions could then reside in the utils.py
+# This function handles the general functionality of the show stats section, allowing to call different functions
+# via a dictionary as an interface, which makes the function calling more dynamic
 def show_stats() -> bool:
-    write("[b] Statistics [/b]")
+    write("[b] Statistics [/b]", menu_delay)
     filename = 'game_data.json'
     stored_games = {}
     with open(filename, 'r') as json_file:

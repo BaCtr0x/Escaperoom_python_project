@@ -11,9 +11,6 @@ from visuallize import show_stats
 def launch_game() -> bool:
     clear_console()
 
-    # TODO hint eingeben, das 'help' immer funktioniert
-
-
     # create a game instance
     name = cinput("What is your name?:\n")
     game = Game(name)
@@ -33,7 +30,7 @@ def launch_game() -> bool:
 
 
 def load_game() -> bool:
-    write("[b] Load a game [/b]")
+    write("[b] Load a game [/b]\n",menu_delay)
     name = cinput("What is your name?\n")
     if "exit" in name:
         return False
@@ -42,19 +39,16 @@ def load_game() -> bool:
     return False
 
 
-# TODO: add the ability to delete save state :D am besten über ein Menu mit 1. writing speed, 2. delete specific state,
-#  3. delete all
-
 def show_option_menu(clear=False):
     if clear:
         clear_console()
 
-    write("[b]Options[/b]\n", 0)
+    write("[b]Options[/b]\n", menu_delay)
 
     write("1. Change writing speed\n"
           "2. Delete a specific save state\n"
           "3. Delete all save states\n"
-          "4. Exit", 0)
+          "4. Exit", menu_delay)
 
 
 def options() -> bool:
@@ -113,6 +107,7 @@ def main_menu():
         4: options,
         5: exit_game
     }
+    load_writing_speed()
 
     # helper variable for displaying menu
     run = 0
@@ -120,7 +115,7 @@ def main_menu():
     bexit = False
     while not bexit:
         if run == 0:
-            write("[b]Main menu[/b]\n"
+            write("[b]Main menu[/b]\n\n"
                   "1. Play game \n"
                   "2. Load Game \n"
                   "3. Show stats \n"
@@ -128,7 +123,7 @@ def main_menu():
                   "5. Exit game\n"
                   "\n\n You can navigate the menus by either entering the corresponding number or typing the name of "
                   "the operation you want to select. \n\n"
-                  "You can always type 'help', to see what you can do.\n", 0)
+                  "You can always type 'help', to see what you can do.\n", menu_delay)
             user_inp = main_menu_selection(cinput("What do you want to do?\n"))
         if user_inp != -1:
             clear_console()
@@ -136,7 +131,7 @@ def main_menu():
             clear_console()
             run = 0
         else:
-            write("Please enter either a number between 1 and 5 or for example 'Play Game'", 0)
+            write("Please enter either a number between 1 and 5 or for example 'Play Game'", menu_delay)
             user_inp = main_menu_selection(cinput(""))
             run = 1
 

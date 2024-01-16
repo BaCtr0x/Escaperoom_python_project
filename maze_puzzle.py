@@ -11,7 +11,7 @@ from utils import cinput, write, clear_console, default_commands
 
 # list of hints for the user
 hints = [
-    f"The start point is '[g]{chr(9654)}[/g]' and the end is '[r]■[/r]'.",
+    f"The start point is '[/y][g]{chr(9654)}[/g][y]' and the end is '[/y][r]■[/r][y]'.",
     "Follow the path and see what you can find.",
     "The letters don't seem to have a meaning, but does it matter?",
     "Entering the letters in the encountered order might do the trick."
@@ -239,7 +239,6 @@ def write_maze(maze: np.ndarray, solution: str, s_e_pos: list):
 
 
 def maze_puzzle(game) -> time:
-    write("Hier kommt die neue Raumbeschreibung und was passieren wird :D")
     hint_count = len(game.get_hints_used(game.get_current_level()))
     level_state = game.get_level_state()
 
@@ -272,22 +271,45 @@ def maze_puzzle(game) -> time:
     # set solution to lowercase
     solution = solution.lower()
 
+    write("You enter the well lit room. The warm light of the four torches that are placed on top of a fence about\n"
+          "5 meters in front of you, covers everything in its orange flickering colour and lets the shadows of the \n"
+          "room dance with every breeze. The air is fresh and cold. And as you make a few steps towards the fence you\n"
+          "realise that you are standing on some kind of balcony hanging over a huge hall that was carved into the\n"
+          "mountain. The hall is split into uncountably many path by walls at least 3 meters in height. Cold air \n"
+          "rushes up from down under and you start to shiver. You concentrate and take in the hole view, just to\n"
+          "realize that you are looking at a giant maze.\n"
+          f"You take a look around, you see {sol_len} stone wheels set into the left wall, all set to random letters.\n"
+          "A few questions immediately rush through your head: 'What is the connection?', 'Who would build something\n"
+          "like this' and what am I supposed to do?\n")
+
     # use input loop
     while True:
-        ans = cinput("What do you set the stone tires to?\n").replace(" ", "").lower()
+        ans = cinput("What do you set the stone tires to?\n").replace(" ", "").replace(",", "").lower()
         if ans == solution:
             stop = time.time()
-            write("Here goes the description of what happens next")
+            write("As you enter the random letters you hear a dark rumble coming from above, like the grinding of \n"
+                  "stone on stone, mixed with the mechanical clicking of ginormous gear wheels.\n"
+                  "Your eyes jump back to the cavern in which you examined the maze and see part of the ceiling\n"
+                  "descending to the ground. With a loud thump it stops exactly at the height of you platform.\n"
+                  "And just now you see the small hinges of in the fence in front of you creating a small gate within\n"
+                  "it. You walk over and as you come closer small lanterns light up one after the other to clear the\n"
+                  "view of the now resting bridge across the hall. You have no idea what is going on and don's know\n"
+                  "who would build such a structure, but it doesn't matter. You need to find the old lady and hopefully\n"
+                  "her daughter as fast a possible. With this you rush across the bridge and enter the almost familiar\n"
+                  "darkness of the corridor at the end to see what ever is next.\n")
 
-            return round(stop - start, 2), hints[:hint_count], 0
+            return round(stop - start, 2), 0
         elif "ex" in ans or "hi" in ans or "he" in ans or "_" in ans:
             stop = default_commands(ans, hints, hint_count, game)
-            if stop != 0:
-                return round(stop - start, 2), hints[:hint_count], 1
+            if type(stop) == int:
+                hint_count = stop
+            # case of entering 'exit'
+            elif type(stop) == float:
+                return round(stop - start, 2), 1
         elif "olaf" in ans:
             write(solution, 0)
         else:
-            write("Nothing seems to happen, maybe the order is not correct yet.")
+            write("Nothing seems to happen, maybe the order is not correct yet.\n")
 
 
 # just for debugging

@@ -11,7 +11,9 @@ from tabulate import tabulate
 # ------------------------------------------- Global Values -----------------------------------------------------------
 
 # value changed through options function in main.py 0.015, for debugging set this to 0.00
-default_delay = 0.000
+default_delay = 0.015
+# change the speed at which the menu elements are displayed
+menu_delay = 0.00000
 
 # ---------------------------------------- Classes and Structs ---------------------------------------------------------
 
@@ -27,7 +29,7 @@ TAG_COLORS = {
     'c': '96',  # Cyan
     'lp': '94',  # Light purple
     'o': '33',  # Orange
-    'bl': '34'  #blue
+    'bl': '34'  # blue
 }
 
 
@@ -60,13 +62,13 @@ def display_games(stored_games: dict, displayable_games: list):
     for s_ind in range(len(sorted_info)):
         sorted_info[s_ind][0] = f"{s_ind}."
     # index noch überschreiben mit neuem
-    write(f"{tabulate(sorted_info, headers=headers, tablefmt='pretty')}\n \n \n", 0)
+    write(f"{tabulate(sorted_info, headers=headers, tablefmt='pretty')}\n \n \n", menu_delay)
 
 
 # delete all the save states
 def delete_all_safe_states():
     clear_console()
-    write("So you want to delete all safe states?\n", 0)
+    write("So you want to delete all safe states?\n", menu_delay)
     ans = cinput("Please confirm your answer with 'yes' or 'no'\n")
     while True:
         if "y" in ans:
@@ -78,7 +80,7 @@ def delete_all_safe_states():
                 # Step 3: Write the modified data back to the file
                 with open(filename, 'w') as file:
                     json.dump(existing_data, file, indent=4)
-                write("[b][r]All safe states have been deleted![/r][/b]")
+                write("[b][r]All safe states have been deleted![/r][/b]", menu_delay)
                 inp = cinput("Press enter to go back to the options menu.\n")
                 return False
             else:
@@ -90,17 +92,17 @@ def delete_all_safe_states():
 def delete_specific_safe_state():
     filename = 'game_data.json'
     write("[b]Options[/b]\n"
-          "So you want to [b]delete[/b] a specific safe state.\n")
+          "So you want to [b]delete[/b] a specific safe state.\n", menu_delay)
     name = cinput("Please enter a player name of which you want to delete a safe state.\n").lower()
 
     if not os.path.exists(filename):
-        write("[b]No[/b] game has been played yet.", 0)
+        write("[b]No[/b] game has been played yet.", menu_delay)
     else:
         with open(filename, 'r') as json_file:
             stored_games = json.load(json_file)
         games = [elem for elem in stored_games.keys() if name in elem.lower()]
         if len(games) == 0:
-            write("It seems that there are no save games with the entered player name :(\n", 0)
+            write("It seems that there are no save games with the entered player name :(\n", menu_delay)
             ans = cinput("Did you misspell or want to delete a different save state? (y,n)\n")
             if "y" in ans:
                 delete_specific_safe_state()
@@ -129,7 +131,19 @@ def delete_specific_safe_state():
                     return False
                 except ValueError:
                     ans = cinput(f"Please select a number between 0 and {len(games) - 1}.\n")
-    # TODO finish this
+
+
+# This function loads the settings.json file and updates the corresponding settings values
+def load_writing_speed():
+    global default_delay
+    if not os.path.isfile("settings.json"):
+        with open("settings.json", "w") as json_file:
+            json.dump({"speed": default_delay}, json_file, indent=4)
+    else:
+        with open("settings.json", "r") as json_file:
+            settings = json.load(json_file)
+            default_delay = settings["speed"]
+
 
 # A simple function to change the typing speed of the write function
 def change_typing_speed():
@@ -138,21 +152,22 @@ def change_typing_speed():
 
     # this might need to be updated if the different speeds are not good
     speed_dic = {
-        0: 0.5,
-        1: 0.4,
-        2: 0.3,
-        3: 0.2,
-        4: 0.1,
-        5: 0.05,
-        6: 0.04,
-        7: 0.03,
-        8: 0.02,
-        9: 0.015,
-        10: 0.0
+        0: 0.1,
+        1: 0.05,
+        2: 0.04,
+        3: 0.03,
+        4: 0.02,
+        5: 0.015,
+        6: 0.0125,
+        7: 0.0010,
+        8: 0.00075,
+        9: 0.00050,
+        10: 0.0000
     }
     clear_console()
     write("[b]Change writing speed[/b]\n\n"
-          "So you want to change the speed of which the text is displayed.\n", 0)
+          "So you want to change the speed of which the text is displayed.\n"
+          "As a reference the default writing speed is: [y]5[/y]", menu_delay)
 
     speed = cinput("Please enter a number between 0 and 10, where 0 is very slow and instantaneous.\n")
 
@@ -160,7 +175,7 @@ def change_typing_speed():
         try:
             speed = int(speed)
             default_delay = speed_dic[speed]
-            write("This is an example to show you the typing speed you entered.\n")
+            write("This is an example to show you the typing speed you entered.\n", menu_delay)
             speed = cinput("Is this good? (y,n)\n").lower()
         except ValueError:
             if "ex" in speed:
@@ -169,6 +184,9 @@ def change_typing_speed():
                 speed = cinput("Please enter a number between 0 and 10.")
 
         if speed == "y" or speed == "yes":
+            # save the change made to the writing speed in setting file
+            with open("settings.json", "w") as json_file:
+                json.dump({"speed": default_delay}, json_file, indent=4)
             return False
         elif "ex" in speed:
             return False
@@ -177,12 +195,13 @@ def change_typing_speed():
             speed = cinput().lower()
 
 
+
 def get_terminal_width() -> int:
     try:
         terminal_width, _ = shutil.get_terminal_size()
         return terminal_width
     except Exception as e:
-        print(f"Error getting terminal width: {e}")
+        write(f"[r]Error getting terminal width: {e}[/r]", 0)
         return 0
 
 
@@ -209,7 +228,7 @@ def clear_console():
         else:
             os.system('clear')  # For Unix-based systems (Linux, macOS)
     except Exception as e:
-        print(f"Failed to clear the console: {e}")
+        write(f"[r]Failed to clear the console: {e}[/r]")
 
 
 def is_closing_tag(tag):
@@ -279,25 +298,34 @@ def print_hint(hint: str):
 def cinput(prompt=""):
     padding = (get_terminal_width() - len(prompt)) // 2
     cursor_padding = get_terminal_width() // 2
-    input_text = input(' ' * padding + prompt + ' ' * cursor_padding)
+    if prompt == "":
+        input_text = input(' ' * cursor_padding)
+    else:
+        input_text = input(' ' * padding + prompt + ' ' * cursor_padding)
     return input_text
 
 
 # this function handles the basic commands for help, hint and exit
-def default_commands(inp: str, hints: list, hint_count: int, game) -> time:
+def default_commands(inp: str, hints: list, hint_count: int, game):
     if "ex" in inp:
         stop = time.time()
         game.save_game()
         return stop
     elif "he" in inp:
         help_text()
+    elif not hints:
+        write("There are no hints for this puzzle, you can do this!\n", 0)
     elif "o_h" in inp:
         old_hints = '\n'.join(game.get_hints_used())
         write(f"[y]{old_hints}[/y]\n")
-    elif "hin" in inp:
+    elif "hint" in inp:
         print_hint(hints[hint_count])
         game.set_hint_used(hints[hint_count])
-        hint_count += 1 + len(game.get_hints_used(game.get_current_level()))
+
+        # need to do -1 as we added the current hint to the list, and it thus is one longer then the list at the point
+        # of asking for the hint
+        hint_count += 1 + len(game.get_hints_used(game.get_current_level())) - 1
+        return hint_count
     return 0
 
 
@@ -306,8 +334,8 @@ def help_text():
     write("[c]You can either do type the answer. Be aware, that it will require you to enter the answer\n"
           "as stated by the prompt. The other options are: \n"
           "- 'hint', to get a hint for the current puzzle\n"
-          "- 'exit', to get back to the main menu.[/c]\n"
-          "- 'old_hints' if you loaded a game you can get your hints back\n")
+          "- 'exit', to get back to the main menu.\n"
+          "- 'old_hints' if you loaded a game you can get your hints back[/c]\n")
 
 
 if __name__ == "__main__":

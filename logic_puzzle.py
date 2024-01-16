@@ -53,21 +53,24 @@ def logic_puzzle(game) -> time:
             stop = time.time()
             write("You move the symbols around and with a quite 'click' they lock in place. The fireplace instantly \n"
                   "extinguishes. And with the sound of splitting wood, you see in the flickering light of your candle\n"
-                  "a door forming in the wall. A short hall opens in front of you that terminates in another room. The \n"
-                  "smell is old and musty and you get the feeling that this won't be such a simple case, as you \n"
+                  "a door forming in the wall. You push your fingers behind the small gap that appeared, the slight\n"
+                  "pain of a small splinter that gets stuck in your index finger lets you revolt shortly. But you\n"
+                  "continue opening the light door. A short hall opens in front of you that terminates in another room.\n"
+                  "The smell is old and musty and you get the feeling that this won't be such a simple case, as you\n"
                   "continue on.\n \n")
 
-            return round(stop - start, 2), hints[:hint_count], 0
+            return round(stop - start, 2), 0
         elif "ex" in ans or "hi" in ans or "he" in ans or "_" in ans:
             stop = default_commands(ans, hints, hint_count, game)
-            if stop != 0:
-                return round(stop - start, 2), hints[:hint_count], 1
+            # in case of entering 'hint'
+            if type(stop) == int:
+                hint_count = stop
+            # case of entering 'exit'
+            elif type(stop) == float:
+                return round(stop - start, 2), 1
         # check whether the cinput is in the correct form or not
         elif bool([element for element in ans if element not in puzzle_symbols]):
-            print("Please write your answer in the form of: a,b,c,d")
+            write("Please write your answer in the form of: a,b,c,d or did you misspell?\n"
+                  "Nonetheless less nothing seems to happen.\n")
         else:
-            write("Nothing seems to happen, maybe the order is not correct yet.")
-
-
-if __name__ == "__main__":
-    logic_puzzle()
+            write("Nothing seems to happen, maybe the order is not correct yet.\n")
