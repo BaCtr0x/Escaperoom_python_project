@@ -36,9 +36,13 @@ def calculate_distance(point1, point2):
 
 # generates start and end coordinates with a given distance
 def random_start_end(dim: int, min_distance=0) -> list:
+    # calculates the minimum distance between start and end if none is provided, this ensures that they are not too
+    # close together
     if min_distance == 0:
         min_distance = (dim + 1) * 2
 
+    # maximum number of generations as the generation is random based and thus no perfect run at first execution is
+    # ensured
     max_num_gen = 100000
     current_gen_num = 0
 
@@ -47,24 +51,29 @@ def random_start_end(dim: int, min_distance=0) -> list:
 
     # not pretty but works
     while True:
+        # get a random direction of start and end
         s_direct = random.randint(0, 1)
         e_direct = random.randint(0, 1)
 
+        # get random numbers on the edge of the maze along the randomly selected axis
         if s_direct == 0:
             start = [random.randint(1, 2 * dim - 1), 0]
         else:
             start = [0, random.randint(1, 2 * dim - 1)]
 
+        # do the same for the end position
         if e_direct == 0:
             end = [0, random.randint(1, 2 * dim - 1)]
         else:
             end = [random.randint(1, 2 * dim - 1), 0]
 
+        # calculate the distance between start and end to check if they are a good fit
         test_distance = calculate_distance(start, end)
 
         # return if a good start, end pair was found
         if test_distance >= min_distance:
             return [start, end]
+        # if the current positions are better than the ones before, store the current one as the best encountered option
         elif test_distance > best_distance:
             best_distance = test_distance
             best_pair = [start, end]
@@ -76,43 +85,7 @@ def random_start_end(dim: int, min_distance=0) -> list:
             current_gen_num += 1
 
 
-def create_maze(dim: int, s_e_pos: list) -> np.ndarray:
-    # Create a grid filled with walls
-    maze = np.full((dim * 2 + 1, dim * 2 + 1), '#')
-
-    # Define the starting point
-    x, y = (0, 0)
-    maze[2 * x + 1, 2 * y + 1] = '.'
-
-    # Define possible directions
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-
-    # Initialize the stack with the starting point
-    stack = [(x, y)]
-    while len(stack) > 0:
-        x, y = stack[-1]
-
-        random.shuffle(directions)
-
-        for dx, dy in directions:
-            nx, ny = x + dx, y + dy
-            if nx >= 0 and ny >= 0 and nx < dim and ny < dim and maze[2 * nx + 1, 2 * ny + 1] == '#':
-                maze[2 * nx + 1, 2 * ny + 1] = '.'
-                maze[2 * x + 1 + dx, 2 * y + 1 + dy] = '.'
-                stack.append((nx, ny))
-                break
-        else:
-            stack.pop()
-
-    # Create an entrance and an exit
-    start = s_e_pos[0]
-    end = s_e_pos[1]
-    maze[start[0], start[1]] = 'S'
-    maze[end[0], end[1]] = 'E'
-
-    return maze
-
-
+# creates the maze as a ndarray given a start and end position as well as a dimension that is later doubled
 def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
     # Choose a random start and end position from the given list
     start, end = s_e_pos
@@ -130,17 +103,24 @@ def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
     # Define possible directions
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
+    # set the start to '.'
     maze[start[0], start[1]] = '.'
 
     connection_to_end = False
+
+    # create the path through of the maze
     while len(stack) > 0:
+        # get the last element of the stack
         x, y = stack[-1]
 
         # With this, we ensure that the paths differ from run to run
         random.shuffle(directions)
 
+        # check the directions and continue on if possible
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
+
+            # check if the next step is within the maze and a position that has not been visited yet
             if 0 < nx < 2 * dim and 0 < ny < 2 * dim and (nx, ny) not in visited:
                 if dx == 0:
                     # check if the front diagonals are part of a path and not a corner block
@@ -150,6 +130,7 @@ def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
                     # check if the front diagonals are part of a path and not a corner block
                     go = maze[x + dx, y + -1] != "." and maze[x + dx, y + 1] != "." and \
                          maze[nx + dx, ny + -1] != "." and maze[nx + dx, ny + 1] != "."
+                # change the position to a path symbol if allowed
                 if maze[x + 2 * dx, y + 2 * dy] != "." and go:
                     maze[nx, ny] = '.'
                     maze[x + dx, y + dy] = '.'
@@ -160,8 +141,11 @@ def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
                         connection_to_end = True
                     break
         else:
+            # pop from stack for backtracking
             stack.pop()
 
+    # run the entire process again if the connection to end operation did not work, just an edge case, can be removed
+    # with some tweeking
     if not connection_to_end:
         maze = create_maze_rand_se(m_dim, s_e_pos)
 
@@ -172,26 +156,44 @@ def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
     return maze
 
 
+# BFS algorithm to find the shortest path, different appraoches are explained nicely here:
+# https://lvngd.com/blog/generating-and-solving-mazes-with-python/
+# the best option would have been A* but its more complicated and would have taken too much time to implement,
+# additionally this is fine for these small mazes, if we scale the maze much further this would be too inefficient
 def find_shortest_path(maze: np.ndarray, s_e_pos: list) -> np.ndarray:
-    # BFS algorithm to find the shortest path
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    # add one to start in the maze if the position is 0 for start or end
-    # s_e_pos[0] = [num + 1 if num == 0 else num for num in s_e_pos[0]]
-    # s_e_pos[1] = [num - 2 if num == 0 else num for num in s_e_pos[1]]
 
+    # could also be placed as a global variable, but I like this more, as it is easier to remember while coding
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+    # get the start and end position
     start = tuple(s_e_pos[0])
     end = tuple(s_e_pos[1])
 
+    # create a ndarray of zeroes to store the visited notes in
     visited = np.zeros_like(maze, dtype=bool)
     visited[start] = True
+
+    # create the queue for the BFS algorithm and add the start position to it
     queue = Queue()
     queue.put((start, []))
+
+    # perform the BFS algorithm until the queue is empty, which is the case when no path could be found from start to end
     while not queue.empty():
+        # get the current node (position) and the path to this node
         (node, path) = queue.get()
+
+        # check the possible directions to go along
         for dx, dy in directions:
+
+            # calculate the next node
             next_node = (node[0] + dx, node[1] + dy)
+
+            # return the found path if the end node is reached
             if next_node == end:
                 return path + [next_node]
+
+            # add next node to the list of visited nodes and add the next node to the queue to start from there in the
+            # next step, extend the current path by this node as well.
             if (0 <= next_node[0] < maze.shape[0] and 0 <= next_node[1] < maze.shape[1] and
                     maze[next_node] == '.' and not visited[next_node]):
                 visited[next_node] = True
@@ -201,47 +203,69 @@ def find_shortest_path(maze: np.ndarray, s_e_pos: list) -> np.ndarray:
 # places the random letters, that create the solution of the puzzle randomly along the path through the maze
 def place_puzzle_letters(maze: np.ndarray, path: np.ndarray, num_letters: int) -> str:
     letters = string.ascii_uppercase
+    # sample num_letters many letters from the upper case letters of the english alphabet
     random_letters = random.sample(letters, num_letters)
 
+    # sample random positions from the shortest path
     random_pos = random.sample(path, num_letters)
 
+    # place the randomly sampled letters at the random positions along the shortest path
     for ind, pos in enumerate(random_pos):
         maze[pos] = random_letters[ind]
 
+    # return the string of random letters, which is the solution to this puzzle
     return ''.join(random_letters)
 
 
+# This function converts the maze as the ndarray to the string that is being printed
 def maze_to_string(maze: np.ndarray, solution: str, s_e_pos: list) -> str:
     # Print the resulting maze
     maze_str = []
+
+    # appends all rows to the maze string, and add a space in between the symbols, as this makes the maze look better
+    # when printed
     for row in maze:
         maze_str.append(' '.join(row))
+
+    # add line breaks after every row
     maze_str = "\n".join(maze_str)
 
     start = s_e_pos[0]
     end = s_e_pos[1]
 
-    # start_ind_replace = (start[1] + start[0] * (dim * 2 + 1)) * 2
-    # end_ind_replace = (end[1] + end[0] * (dim * 2 + 1)) * 2
-
+    # make the letters of the solution appear yellow
     for letter in solution:
         maze_str = maze_str.replace(f"{letter}", f"[y]{letter}[/y]")
+
+    # turn the start symbol, which is an arrow to a green arrow
     maze_str = maze_str.replace(f"{chr(9654)}", f"[g]{chr(9654)}[/g]")
+
+    # turn the end box into a red end box
     maze_str = maze_str.replace(f"{'■'}", f"[r]{'■'}[/r]")
 
+    # return the finished maze string
     return maze_str
 
 
+# This function uses the write function to print the maze string
 def write_maze(maze: np.ndarray, solution: str, s_e_pos: list):
+    # first convert the ndarray of the maze into a string
     maze_str = maze_to_string(maze, solution, s_e_pos)
 
+    # print the maze
     write(maze_str)
 
 
+# This function is the heart of this puzzle, as it manages the everything
 def maze_puzzle(game) -> time:
+    # get the number of hints from the stored game, this is zero as len([]) is 0 which is the case of a new game
     hint_count = len(game.get_hints_used(game.get_current_level()))
+
+    # get the state of the game for this level, which contains the maze and the solution, such that the maze is the
+    # same when the game is loaded
     level_state = game.get_level_state()
 
+    # print the introduction text of the room
     write("\nYou enter the well lit room. The warm light of the four torches that are placed on top of a fence about\n"
           "5 meters in front of you, covers everything in its orange flickering colour and lets the shadows of the \n"
           "room dance with every breeze. The air is fresh and cold. And as you make a few steps towards the fence you\n"
@@ -270,6 +294,8 @@ def maze_puzzle(game) -> time:
         game.set_level_state(state)
 
         write_maze(maze, solution, s_e_pos)
+
+    # get the maze and solution from the stored game and print it
     else:
         maze = level_state["maze"]
         solution = level_state["solution"]
@@ -286,7 +312,7 @@ def maze_puzzle(game) -> time:
     # set solution to lowercase
     solution = solution.lower()
 
-    # use input loop
+    # use input loop to handle user interaction
     while True:
         ans = cinput("What do you set the stone tires to?\n").replace(" ", "").replace(",", "").lower()
         if ans == solution:
@@ -302,9 +328,11 @@ def maze_puzzle(game) -> time:
                   "her daughter as fast a possible. With this you rush across the bridge and enter the almost familiar\n"
                   "darkness of the corridor at the end to see what ever is next.\n")
 
+            # return the time taken to solve the puzzle and 0 to indicate that the next level can be loaded
             return round(stop - start, 2), 0
         elif "ex" in ans or "hi" in ans or "he" in ans or "_" in ans:
             stop = default_commands(ans, hints, hint_count, game)
+            # check if the hint command was used
             if type(stop) == int:
                 hint_count = stop
             # case of entering 'exit'

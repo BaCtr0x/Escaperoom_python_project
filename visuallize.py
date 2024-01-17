@@ -6,32 +6,38 @@ from tabulate import tabulate
 
 from utils import write, cinput, clear_console, menu_delay
 
-
+# Helper function that extracts the games with completed levels
 def get_games_with_completed_levels(games: dict) -> dict:
     filtered_entries = {key: value for key, value in games.items() if value["levels_completed"]}
     return filtered_entries
 
 
+# helper function that extracts the games with used hints
 def get_games_with_used_hints(games: dict) -> dict:
     filtered_entries = {key: value for key, value in games.items() if value["hints_used"]}
     return filtered_entries
 
 
+# This function creates a dictionary of all the games that have at least one completed level for all players
 def create_dict_completed_levels(games: dict) -> dict:
     res = {}
 
+    # go over the games with their key and value
     for key, value in games.items():
         player_name = value["player_name"]
 
+        # if the player name is not yet in the results dictionary add it
         if player_name not in res:
             res[player_name] = {}
 
+        # set the res of the current player to the level and store the time he took in the last session
         for level, time_taken in value["levels_completed"].items():
             if level not in res[player_name] or time_taken < res[player_name][level]:
                 res[player_name][level] = time_taken
     return res
 
 
+# similar to the create_dict_completed_levels function but with hints instead of completed levels
 def create_dict_completed_levels_hints(games: dict) -> dict:
     res = {}
 
@@ -47,6 +53,7 @@ def create_dict_completed_levels_hints(games: dict) -> dict:
     return res
 
 
+# As before but with a given name and not all players
 def create_dict_completed_levels_same_name(games: dict) -> dict:
     res = {}
 
@@ -60,7 +67,7 @@ def create_dict_completed_levels_same_name(games: dict) -> dict:
                 res[key][level] = time_taken
     return res
 
-
+# same as the function above but with hints
 def create_dict_completed_levels_hints_same_name(games: dict) -> dict:
     res = {}
 
@@ -75,6 +82,7 @@ def create_dict_completed_levels_hints_same_name(games: dict) -> dict:
     return res
 
 
+# This function extracts all the information from the time dictionary and hints dictionary needed for the scatter plot
 def create_dict_for_scatter_plot(times: dict, hints: dict) -> dict:
     # Extracting data for plotting
     player_names = []
@@ -320,6 +328,7 @@ def decapitalize_words(s):
     return decapitalized_words
 
 
+# This function display the score board in a tabular manner
 def score_board(games: dict):
     headers = ["Player Name", "Date"]
     puzzle_headers = []

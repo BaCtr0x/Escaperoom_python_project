@@ -2,6 +2,7 @@ from cesar_puzzle import cesar_puzzle
 from logic_puzzle import logic_puzzle
 from maze_puzzle import maze_puzzle
 from image_puzzle import image_puzzle
+from number_puzzle import number_puzzle
 
 from utils import *
 
@@ -9,8 +10,9 @@ from utils import *
 levels = {
     0: logic_puzzle,
     1: image_puzzle,
-    2: maze_puzzle,
-    3: cesar_puzzle
+    2: number_puzzle,
+    3: maze_puzzle,
+    4: cesar_puzzle
 }
 
 default_filename = 'game_data.json'
@@ -85,47 +87,57 @@ class Game:
             name = str(level).split(" ")[1].split(" ")[0]
             self._level_state[name] = {}
 
-    def __get_level_name(self, level_ind=-1) -> str:
+    # getter for the level name
+    def get_level_name(self, level_ind=-1) -> str:
         if level_ind == -1:
             return str(levels[self._current_level]).split("at")[0].split(" ")[1]
         else:
             return str(levels[level_ind]).split("at")[0].split(" ")[1]
 
+    # getter for the player name
     def get_player_name(self) -> str:
         return self._player_name
 
+    # getter for the current level
     def get_current_level(self) -> int:
         return self._current_level
 
+    # getter for the completed levels
     def get_levels_completed(self) -> dict:
         return self._levels_completed
 
+    # getter for the used hints
     def get_hints_used(self, level_ind=-1) -> list:
         if level_ind == -1:
-            return self._hints_used[self.__get_level_name(self._current_level)]
+            return self._hints_used[self.get_level_name(self._current_level)]
         try:
-            return self._hints_used[self.__get_level_name(level_ind)]
+            return self._hints_used[self.get_level_name(level_ind)]
         except KeyError:
             return []
 
+    # setter for the state of the level
     def set_level_state(self, state: {}):
         name = str(levels[self._current_level]).split(" ")[1].split(" ")[0]
         self._level_state[name] = state
 
+    # getter for the state of the current level
     def get_level_state(self):
         name = str(levels[self._current_level]).split(" ")[1].split(" ")[0]
         return self._level_state[name]
 
+    # setter for the used hints
     def set_hint_used(self, hint: str):
-        level = self.__get_level_name()
-        if self.__get_level_name() not in self._hints_used.keys():
+        level = self.get_level_name()
+        if level not in self._hints_used.keys():
             self._hints_used[level] = [hint]
         else:
             self._hints_used[level].append(hint)
 
+    # This function create a unique identifier by using the player name in lower case and the current date and time
     def generate_unique_identifier(self) -> str:
         return f"{self._player_name.lower()}_{get_date()}"
 
+    # store the completed level and update the importent information
     def complete_level(self, level: str, time_taken: time):
         if level in self._levels_completed.keys():
             self._levels_completed[level] += time_taken
@@ -135,7 +147,9 @@ class Game:
         self._current_level += 1
         self.save_game()
 
+    # save the game
     def save_game(self, filename=default_filename):
+        # create dictionary with the needed information
         game_data = {
             'player_name': self._player_name,
             'current_level': self._current_level,
@@ -144,6 +158,7 @@ class Game:
             'level_state': self._level_state
         }
 
+        # check if the path of the filename points to an existing file and if so read it and get the information from it
         if os.path.exists(filename):
             # If the file exists, load existing data
             with open(filename, 'r') as json_file:
@@ -159,7 +174,11 @@ class Game:
         with open(filename, 'w') as json_file:
             json.dump(existing_data, json_file, indent=4)
 
+    # this function lets the user play the game
     def play(self) -> int:
+
+        # as long as the player has not completed all levels run the current puzzle, after that store time and go to
+        # the next level. Exit if the player used the exit command
         while self._current_level < len(levels.keys()):
             write(f"[b]Room {self._current_level}[/b]")
             level_time, ex = levels[self._current_level](self)
@@ -167,11 +186,19 @@ class Game:
                 return 1
             level_name = str(levels[self._current_level]).split("at")[0].split(" ")[1]
             self.complete_level(level_name, level_time)
+
+            # this allows the player to move to the next room at his own time
             cinput("Press enter to continue.\n")
             clear_console()
+
+        # write the end of the story if the player solved all puzzles
         write_story_ending()
         write("[b]Thanks for playing our game, we hope you enjoyed it :)[/b]\n")
+
+        # allows the player to directly end the game or go back to the main menu
         inp = cinput("Do you want to go back to the main menu (1) or exit the game (2)?\n")
+
+        # a simple check of the user input to prevent errors
         try:
             inp = int(inp)
             return inp
@@ -179,27 +206,35 @@ class Game:
             write("You entered something else, we will move you to the main menu :)\n")
             return 1
 
+    # This function allows us to load the game
     def load_game(self, filename=default_filename):
+        # check whether the path of the filename points to an existing file or not
         if not os.path.exists(filename):
-            write("[b]No[/b] game has been played yet.", 0)
+            write("[b]No[/b] game has been played yet.", menu_delay)
         else:
+            # read the saved games
             with open(filename, 'r') as json_file:
                 stored_games = json.load(json_file)
+                # check for games with the entered player name
                 games = [elem for elem in stored_games.keys() if self._player_name.lower() in elem.lower()]
 
                 if len(games) > 0:
+                    # remove games which have been completed, as there is no point in loading them
                     loadable_games = list(filter(lambda key: stored_games[key]['current_level'] != len(levels.keys()),
                                                  games))
                     # Check if the player died any of the states and remove the corresponding state from the loadable
                     # games
                     for id in loadable_games:
                         try:
-                            if stored_games[id]["current_level"] == 1 and \
-                                    stored_games[id]["level_state"]["image_puzzle"]["death"]:
+                            if 0 < stored_games[id]["current_level"] < 3 and \
+                                    (stored_games[id]["level_state"]["image_puzzle"]["death"] or
+                                     stored_games[id]["level_state"]["number_puzzle"]["death"]):
                                 loadable_games.remove(id)
                         except KeyError:
                             continue
 
+                    # handle the case in which no game can be loaded as all games are either completed or filled with
+                    # dead players
                     if len(loadable_games) == 0:
                         write("It seems that all the games with your name are already completed or ended in death.\n", 0)
                         ans = cinput("Do you want to load a different player? (y,n)\n")
@@ -223,6 +258,8 @@ class Game:
                             break
                         except ValueError:
                             inp = cinput("Please enter just the index number for the save you want to load.\n")
+
+                    # get the information from the json file and store them in the current game instance
                     game_data = stored_games[loadable_games[inp]]
                     self._player_name = game_data["player_name"]
                     self._current_level = game_data["current_level"]
@@ -230,10 +267,13 @@ class Game:
                     self._hints_used = game_data["hints_used"]
                     self._unique_identifier = games[inp]
                     self._level_state = game_data["level_state"]
+
+                    # clear console before running the game
                     clear_console()
                     # start the game after loading the values
                     self.play()
 
+                # Handle the case in which no game with the entered player name exists.
                 else:
                     write("There is [b] no [/b] game save with your player name.")
                     ans = cinput("Did you misspell your name? (y,n)?\n")
