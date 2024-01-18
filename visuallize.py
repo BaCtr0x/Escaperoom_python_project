@@ -31,6 +31,8 @@ def create_dict_completed_levels(games: dict) -> dict:
             res[player_name] = {}
 
         # set the res of the current player to the level and store the time he took in the last session
+        # instead we could loop over all level check if the player completed it and otherwise enter -1 as time to
+        # indicate a not finished level
         for level, time_taken in value["levels_completed"].items():
             if level not in res[player_name] or time_taken < res[player_name][level]:
                 res[player_name][level] = time_taken
@@ -90,6 +92,13 @@ def create_dict_for_scatter_plot(times: dict, hints: dict) -> dict:
     times_dict = {}
 
     # Using lambda expression with map and keys
+    # list(map(lambda x: list(x.keys()), times.values())) gets a list with different number of levels
+    # [
+    # ['logic_puzzle', 'image_puzzle', 'maze_puzzle', 'number_puzzle'],
+    # ['logic_puzzle', 'image_puzzle'],
+    # ['logic_puzzle']
+    # ]
+    # max() selects the one with the most played levels
     puzzle_names = max(list(map(lambda x: list(x.keys()), times.values())))
 
     for key, value in times.items():
@@ -171,7 +180,10 @@ def line_plot(games: dict, y_lable: str):
     # Use seaborn for plotting
     sns.set(style="darkgrid")
 
+    # define the colors for the plot
     palette = sns.color_palette("mako_r", len(games.keys()))
+
+    # do the line plot based on the data, marker true for node and color via palette
     sns.lineplot(data=df, markers=True, palette=palette)
 
     # Set labels and title
@@ -307,6 +319,7 @@ def plot_times_hints_all(games: dict):
 # calculates the score based of the time taken and the number of hints used
 def calculate_score(time_taken: float, hints_used: int):
     base_score = 10000
+    # for every 30 seconds above 10 minutes get a penalty of 50 points
     time_penalty = max(0.0, (time_taken - 600.0) // 30.0) * 50.0
     hints_penalty = hints_used * 100
     total_penalty = time_penalty + hints_penalty
@@ -371,7 +384,7 @@ def score_board(games: dict):
 
         rows.append(row)
 
-    # Sort by score in descending order
+    # Sort by score in descending order ([-1])
     rows = sorted(rows, key=lambda x: x[-1], reverse=True)
 
     # Print the scoreboard using the tabulate library
@@ -427,7 +440,7 @@ def show_stats() -> bool:
             elif inp < 8:
                 stat_options[inp](stored_games)
                 show_menu(clear=True)
-                inp = cinput("What do you want to do now?\n")
+                inp = cinput("What do you want to do now? Please enter a number.\n")
                 continue
             else:
                 inp = cinput("Please enter a valid number.\n")

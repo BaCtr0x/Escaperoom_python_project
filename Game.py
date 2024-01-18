@@ -22,7 +22,7 @@ default_filename = 'game_data.json'
 # It also is the heart of the game containing all functions needed, such as play, save_game and load_game
 def write_main_story():
     write(
-        "[b]The beginning[/b]"
+        "[b]The beginning[/b]\n\n"
         "You wake up slowly. The comfort of your dreams vanishes into mist and you feel the cold air of the room\n"
         "brush against your skin. You pull up your blanket and wrap yourself back up to avoid the cold harsh outside\n"
         "world. The old room made of dark wood shines gloomily in the white light of the sun pushing through the\n"
@@ -77,14 +77,22 @@ def write_story_ending():
 
 class Game:
     def __init__(self, player_name, current_level=0):
+        # '_' makes the variable protected and not viewable from outside the game class
         self._player_name = player_name
         self._current_level = current_level
         self._levels_completed = {}
         self._hints_used = {}
+
+        # for storing the game, we need a unique identifier for the json key
         self._unique_identifier = self.generate_unique_identifier()
         self._level_state = {}
         for level in levels.values():
-            name = str(level).split(" ")[1].split(" ")[0]
+            # str(level) = <function logic_puzzle at 0x000001843C90E5C0>
+            # str(level).split(" ") = ["function", "logic_puzzle", "at", "0x000001843C90E5C0"]
+            # str(level).split(" ")[1] = "logic_puzzle"
+            name = str(level).split(" ")[1]
+
+            # creates dictionary with name as key and an empty dictionary as value
             self._level_state[name] = {}
 
     # getter for the level name
@@ -115,6 +123,14 @@ class Game:
         except KeyError:
             return []
 
+    # setter for the used hints
+    def set_hint_used(self, hint: str):
+        level = self.get_level_name()
+        if level not in self._hints_used.keys():
+            self._hints_used[level] = [hint]
+        else:
+            self._hints_used[level].append(hint)
+
     # setter for the state of the level
     def set_level_state(self, state: {}):
         name = str(levels[self._current_level]).split(" ")[1].split(" ")[0]
@@ -125,19 +141,11 @@ class Game:
         name = str(levels[self._current_level]).split(" ")[1].split(" ")[0]
         return self._level_state[name]
 
-    # setter for the used hints
-    def set_hint_used(self, hint: str):
-        level = self.get_level_name()
-        if level not in self._hints_used.keys():
-            self._hints_used[level] = [hint]
-        else:
-            self._hints_used[level].append(hint)
-
     # This function create a unique identifier by using the player name in lower case and the current date and time
     def generate_unique_identifier(self) -> str:
         return f"{self._player_name.lower()}_{get_date()}"
 
-    # store the completed level and update the importent information
+    # store the completed level and update the important information
     def complete_level(self, level: str, time_taken: time):
         if level in self._levels_completed.keys():
             self._levels_completed[level] += time_taken
@@ -160,7 +168,7 @@ class Game:
 
         # check if the path of the filename points to an existing file and if so read it and get the information from it
         if os.path.exists(filename):
-            # If the file exists, load existing data
+            # If the file exists, load existing data, only read permissions ('r')
             with open(filename, 'r') as json_file:
                 existing_data = json.load(json_file)
         else:
@@ -170,21 +178,23 @@ class Game:
         # Add the current game data to the existing data
         existing_data[self._unique_identifier] = game_data
 
-        # Save the updated data to the file
+        # Save the updated data to the file with write permissions 'w'
         with open(filename, 'w') as json_file:
             json.dump(existing_data, json_file, indent=4)
 
     # this function lets the user play the game
     def play(self) -> int:
-
         # as long as the player has not completed all levels run the current puzzle, after that store time and go to
         # the next level. Exit if the player used the exit command
         while self._current_level < len(levels.keys()):
             write(f"[b]Room {self._current_level}[/b]")
             level_time, ex = levels[self._current_level](self)
+
+            # if the player entered the exit command close the play function
             if ex == 1:
                 return 1
-            level_name = str(levels[self._current_level]).split("at")[0].split(" ")[1]
+            # level_name = str(levels[self._current_level]).split("at")[0].split(" ")[1]
+            level_name = str(levels[self._current_level]).split(" ")[0]
             self.complete_level(level_name, level_time)
 
             # this allows the player to move to the next room at his own time
@@ -230,6 +240,7 @@ class Game:
                                     (stored_games[id]["level_state"]["image_puzzle"]["death"] or
                                      stored_games[id]["level_state"]["number_puzzle"]["death"]):
                                 loadable_games.remove(id)
+                        # could be removed by initializing every dictionary of the levels with {"death": False}
                         except KeyError:
                             continue
 
@@ -257,7 +268,7 @@ class Game:
                             inp = int(inp)
                             break
                         except ValueError:
-                            inp = cinput("Please enter just the index number for the save you want to load.\n")
+                            inp = cinput("Please enter just the index number for the save you want to load or enter exit to go back.\n")
 
                     # get the information from the json file and store them in the current game instance
                     game_data = stored_games[loadable_games[inp]]
@@ -273,7 +284,8 @@ class Game:
                     # start the game after loading the values
                     self.play()
 
-                # Handle the case in which no game with the entered player name exists.
+                # Handle the case in which no game with the entered player name exists, but this should not happen as it
+                # is handled above
                 else:
                     write("There is [b] no [/b] game save with your player name.")
                     ans = cinput("Did you misspell your name? (y,n)?\n")

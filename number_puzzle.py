@@ -1,4 +1,5 @@
 from utils import cinput, write, default_commands
+import time
 
 
 class Zahlenfolgenraetsel:
@@ -24,7 +25,7 @@ class Zahlenfolgenraetsel:
             "But the wall opposite of you is clean, smooth and seems to have been made with modern tools. You step \n"
             "closer and let the cone of light from your flashlight wander of the dark surface. As you go from left to\n"
             "right you see an sequence of seemingly random numbers:\n"
-            f"[c]{self.sequence[:self.length]}[/c]\n"
+            f"[c]{self.sequence[:self.length - 1]}[/c]\n"
             "At the end of the sequence you see an empty spot. So you look around to find any hint of what to do next.\n"
             "On the right you see a small table with a few numbers made of stone, which seem to fit perfectly into the \n"
             "notch in the wall. \n"
@@ -35,7 +36,7 @@ class Zahlenfolgenraetsel:
             inp = cinput("Which combination of numbers will you enter?\n")
 
             # check the input to be the last number of the sequence
-            if inp == str(self.sequence[self.length]):
+            if inp == str(self.sequence[self.length-1]):
                 write(
                     f"\nYou enter {inp} you see the sequence blink from left to right in a bright yellow light and you \n"
                     "hear a loud crackling sound as the wall breaks open to form an opening to another dark corridor\n"

@@ -58,10 +58,14 @@ def display_games(stored_games: dict, displayable_games: list):
 
         info_mat.append(row)
 
+    # sort the matrix by date and time
     sorted_info = sorted(info_mat, key=lambda x: (x[2], x[3]))
+
+    # new index for each row, because of sorting
     for s_ind in range(len(sorted_info)):
         sorted_info[s_ind][0] = f"{s_ind}."
-    # index noch überschreiben mit neuem
+
+    # create tabulate with given format, see https://pypi.org/project/tabulate/
     write(f"{tabulate(sorted_info, headers=headers, tablefmt='pretty')}\n \n \n", menu_delay)
 
 
@@ -116,7 +120,7 @@ def delete_specific_safe_state():
                     return False
                 try:
                     ans = int(ans)
-                    # Sorting based on date and time
+                    # Sorting based on date and time, otherwise entered index and index of games might missmatch
                     sorted_info = sorted(games, key=lambda x: (x.split('_')[1], x.split('_')[2]))
                     del_key = sorted_info[ans]
                     write(f"You are about to delete {del_key}.\n")
@@ -145,6 +149,7 @@ def load_writing_speed():
             default_delay = settings["speed"]
 
 
+#TODO anpassen, dass auch menu speed geändert werden kann
 # A simple function to change the typing speed of the write function
 def change_typing_speed():
     # we need to get the global default_delay to change it here
@@ -169,7 +174,7 @@ def change_typing_speed():
           "So you want to change the speed of which the text is displayed.\n"
           "As a reference the default writing speed is: [y]5[/y]", menu_delay)
 
-    speed = cinput("Please enter a number between 0 and 10, where 0 is very slow and instantaneous.\n")
+    speed = cinput("Please enter a number between 0 and 10, where 0 is very slow and 10 is instantaneous.\n")
 
     while True:
         try:
@@ -181,7 +186,7 @@ def change_typing_speed():
             if "ex" in speed:
                 return False
             else:
-                speed = cinput("Please enter a number between 0 and 10.")
+                speed = cinput("Please enter a number between 0 and 10.\n")
 
         if speed == "y" or speed == "yes":
             # save the change made to the writing speed in setting file
@@ -285,6 +290,7 @@ def save_times(times: dict, filename: str):
 
 
 def get_date() -> str:
+    # gets the system based date and time
     date = datetime.now()
     date = date.strftime("%d-%m-%Y_%H:%M")
     return date

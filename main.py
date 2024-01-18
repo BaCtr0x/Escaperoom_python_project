@@ -1,11 +1,9 @@
-import re
-
 from Game import *
 from utils import write, clear_console, change_typing_speed, cinput, default_commands
 from visuallize import show_stats
 
 
-# This is supposed to be the main file in which the outer structure of the game is going to be placed
+# This is the main file in which the outer structure of the game is going to be placed
 
 
 def launch_game() -> bool:
@@ -30,7 +28,7 @@ def launch_game() -> bool:
 
 
 def load_game() -> bool:
-    write("[b] Load a game [/b]\n",menu_delay)
+    write("[b] Load a game [/b]\n", menu_delay)
     name = cinput("What is your name?\n")
     if "exit" in name:
         return False
@@ -72,6 +70,8 @@ def options() -> bool:
             elif "ex" in op:
                 return False
         try:
+            if op == 4:
+                return False
             options_func[op]()
             show_option_menu(True)
             op = cinput("What do you want to do\n")
@@ -86,11 +86,20 @@ def exit_game():
 
 
 def main_menu_selection(inp: str) -> int:
+    # options the user could input
     options = ["play", "load", "show", "options", "exit"]
+
+    # remove '.' and make input lower case
     inp = inp.lower().replace(".", "")
-    elems = [element for element in options if inp in element]
+
+    # check if the input made by the user contains any of the options given above
+    elems = [element for element in options if element in inp]
+
+    # extract the number in the input string of the user using a regular expression
     num = re.search(r'[1-5]', inp)
-    if 0 < len(elems) < 5:
+
+    # error handling and returning the selected number
+    if 0 != len(elems):
         return options.index(elems[0]) + 1
     elif num is not None:
         return int(num.string)
@@ -117,12 +126,12 @@ def main_menu():
         if run == 0:
             write("[b]Main menu[/b]\n\n"
                   "1. Play game \n"
-                  "2. Load Game \n"
+                  "2. Load game \n"
                   "3. Show stats \n"
                   "4. Options \n"
                   "5. Exit game\n"
                   "\n\n You can navigate the menus by either entering the corresponding number or typing the name of "
-                  "the operation you want to select. \n\n"
+                  "the operation you want to select. An confirm your input by pressing 'enter'.\n\n"
                   "You can always type 'help', to see what you can do.\n", menu_delay)
             user_inp = main_menu_selection(cinput("What do you want to do?\n"))
         if user_inp != -1:
@@ -136,5 +145,6 @@ def main_menu():
             run = 1
 
 
+# for debugging
 if __name__ == "__main__":
     main_menu()
