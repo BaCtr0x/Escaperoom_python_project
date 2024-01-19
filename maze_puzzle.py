@@ -276,7 +276,7 @@ def maze_puzzle(game) -> time:
          )
 
     # checks whether the game has been loaded or not and correspondingly creates a maze or takes the old one
-    if level_state == {}:
+    if level_state == {"death": False}:
 
         s_e_pos = random_start_end(m_dim)
 

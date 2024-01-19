@@ -194,8 +194,15 @@ def line_plot(games: dict, y_lable: str):
     else:
         plt.title('Best Times per Level')
 
+    # make the plot interactive such that the user can press enter inside the console to continue
+    plt.ion()
+
     # Show the plot
     plt.show()
+
+    # press enter to close all plots
+    cinput("Press enter to continue.\n")
+    plt.close("all")
 
 
 def scatter_plots(dfs: dict):
@@ -235,8 +242,15 @@ def scatter_plots(dfs: dict):
     # Adjust layout to prevent overlapping titles
     plt.tight_layout()
 
+    # make the plot interactive such that the user can press enter inside the console to continue
+    plt.ion()
+
     # Show the plot
     plt.show()
+
+    # press enter to close all plots
+    cinput("Press enter to continue.\n")
+    plt.close('all')
 
 
 # This function creates a simple line plot for all games by a given player name over the time they needed for the
@@ -366,9 +380,11 @@ def score_board(games: dict):
         for puzzle in puzzle_headers:
             puzzle = decapitalize_words(puzzle)
             time_taken = player["levels_completed"].get(puzzle.replace("_time/hints", ""), None)
-            hints_used = len(player["hints_used"].get(puzzle.replace("_time/hints", ""), []))
+            hints_used = player["hints_used"].get(puzzle.replace("_time/hints", ""), None)
+            if hints_used is not None:
+                hints_used = len(hints_used)
             if time_taken is None:
-                row.append(f"{time_taken}  / {hints_used}")
+                row.append(f"{time_taken} / {hints_used}")
             else:
                 row.append(f"{time_taken}s / {hints_used}")
 
@@ -380,7 +396,11 @@ def score_board(games: dict):
             [len(player["hints_used"].get(decapitalize_words(puzzle).replace("_time/hints", ""), []))
              for puzzle in puzzle_headers])
         player_score = calculate_score(total_time_taken, total_hints_used)
-        row.append(player_score)
+        # Check if the player died if so set the score to Dead instead of a number
+        if player["level_state"]["image_puzzle"]["death"] or player["level_state"]["number_puzzle"]["death"]:
+            row.append(-1.0)
+        else:
+            row.append(player_score)
 
         rows.append(row)
 
@@ -390,7 +410,7 @@ def score_board(games: dict):
     # Print the scoreboard using the tabulate library
     clear_console()
     write("[b]Score Board[/b]\n\n")
-    write(f"{tabulate(rows, headers=headers, tablefmt='pretty')}\n \n \n", 0.0050)
+    write(f"{tabulate(rows, headers=headers, tablefmt='pretty')}\n \n \n".replace("-1.0", "[r]Dead[/r]"), 0.0050)
     inp = cinput("If you want to close the score board, press enter\n")
     clear_console()
 

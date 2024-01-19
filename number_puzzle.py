@@ -49,8 +49,8 @@ class Zahlenfolgenraetsel:
                 return 0
 
             # handling default commands like exiting the game, using help, hint and old_hint
-            elif "ex" in colour or "hi" in colour or "he" in colour or "_" in colour:
-                stop = default_commands(colour, [], 0, game)
+            elif "ex" in inp or "hi" in inp or "he" in inp or "_" in inp:
+                stop = default_commands(inp, [], 0, game)
                 if type(stop) == float:
                     return 1
 

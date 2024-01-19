@@ -4,6 +4,8 @@ from maze_puzzle import maze_puzzle
 from image_puzzle import image_puzzle
 from number_puzzle import number_puzzle
 
+import matplotlib.pyplot as plt
+
 from utils import *
 
 # This acts like an interface, here are all the levels that are playable
@@ -93,7 +95,7 @@ class Game:
             name = str(level).split(" ")[1]
 
             # creates dictionary with name as key and an empty dictionary as value
-            self._level_state[name] = {}
+            self._level_state[name] = {"death": False}
 
     # getter for the level name
     def get_level_name(self, level_ind=-1) -> str:
@@ -194,11 +196,12 @@ class Game:
             if ex == 1:
                 return 1
             # level_name = str(levels[self._current_level]).split("at")[0].split(" ")[1]
-            level_name = str(levels[self._current_level]).split(" ")[0]
+            level_name = str(levels[self._current_level]).split(" ")[1]
             self.complete_level(level_name, level_time)
 
             # this allows the player to move to the next room at his own time
             cinput("Press enter to continue.\n")
+            plt.close('all')
             clear_console()
 
         # write the end of the story if the player solved all puzzles
@@ -235,14 +238,10 @@ class Game:
                     # Check if the player died any of the states and remove the corresponding state from the loadable
                     # games
                     for id in loadable_games:
-                        try:
-                            if 0 < stored_games[id]["current_level"] < 3 and \
-                                    (stored_games[id]["level_state"]["image_puzzle"]["death"] or
-                                     stored_games[id]["level_state"]["number_puzzle"]["death"]):
-                                loadable_games.remove(id)
-                        # could be removed by initializing every dictionary of the levels with {"death": False}
-                        except KeyError:
-                            continue
+                        if 0 < stored_games[id]["current_level"] < 3 and \
+                                (stored_games[id]["level_state"]["image_puzzle"]["death"] or
+                                 stored_games[id]["level_state"]["number_puzzle"]["death"]):
+                            loadable_games.remove(id)
 
                     # handle the case in which no game can be loaded as all games are either completed or filled with
                     # dead players

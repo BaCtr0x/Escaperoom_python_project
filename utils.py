@@ -131,7 +131,7 @@ def delete_specific_safe_state():
                         # Write the modified data back to the file
                         with open(filename, 'w') as json_file:
                             json.dump(stored_games, json_file, indent=4)
-                        cinput(f"{del_key} has been successfully deleted. Press enter to continue.\n")
+                        cinput(f"[r]{del_key} has been successfully deleted. Press enter to continue.[/r]\n")
                     return False
                 except ValueError:
                     ans = cinput(f"Please select a number between 0 and {len(games) - 1}.\n")
@@ -325,8 +325,11 @@ def default_commands(inp: str, hints: list, hint_count: int, game):
         old_hints = '\n'.join(game.get_hints_used())
         write(f"[y]{old_hints}[/y]\n")
     elif "hint" in inp and not "o_h" in inp:
-        print_hint(hints[hint_count])
-        game.set_hint_used(hints[hint_count])
+        try:
+            print_hint(hints[hint_count])
+            game.set_hint_used(hints[hint_count])
+        except IndexError:
+            write("[r]There are no more hints for this puzzle :( [/r]\n")
 
         # need to do -1 as we added the current hint to the list, and it thus is one longer then the list at the point
         # of asking for the hint

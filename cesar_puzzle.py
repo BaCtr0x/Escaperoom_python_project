@@ -78,7 +78,7 @@ def cesar_puzzle(game) -> time:
     # hint_count = len(game.get_hints_used(game.get_current_level()))
     level_state = game.get_level_state()
 
-    if level_state == {}:
+    if level_state == {"death": False}:
         # Could also be between 0 and 24, but 0 and 26 are boring as nothing happens, so we create a small buffer of 3
         skey = random.randint(3, 23)
         enc_note = cesar_enc(skey, note.upper())
@@ -122,11 +122,18 @@ def cesar_puzzle(game) -> time:
 
     while True:
         ans = cinput("What do you want to do?:\n")
-        if "encrypt" in ans:
-            plaintext = ans.split(":")[1]
-            write(f"{cesar_enc(key, plaintext)}\n")
-        elif "decrypt" in ans:
-            inp = ans.split(":")[1]
+        # check if input follows input convention for encrypt and decrypt
+        try:
+            if ":" in ans:
+                inp = ans.split(":")[1]
+            else:
+                inp = ans.split(" ")[1]
+            splitable = True
+        except IndexError:
+            splitable = False
+        if "encrypt" in ans and splitable:
+            write(f"{cesar_enc(skey, inp)}\n")
+        elif "decrypt" in ans and splitable:
             key = int(inp)
             # saves some computation by not doing the decryption
             if key == skey:
