@@ -207,7 +207,13 @@ def place_puzzle_letters(maze: np.ndarray, path: np.ndarray, num_letters: int) -
     random_letters = random.sample(letters, num_letters)
 
     # sample random positions from the shortest path
-    random_pos = random.sample(path, num_letters)
+    r_pos = 0
+    random_pos = []
+    max_distance = int(len(path) / num_letters)
+    for i in range(num_letters):
+        r_pos += random.randint(num_letters, max_distance)
+        random_pos.append(path[r_pos])
+    # random_pos = random.sample(path, num_letters)
 
     # place the randomly sampled letters at the random positions along the shortest path
     for ind, pos in enumerate(random_pos):

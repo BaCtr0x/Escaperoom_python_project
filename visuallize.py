@@ -6,6 +6,10 @@ from tabulate import tabulate
 
 from utils import write, cinput, clear_console, menu_delay
 
+
+ordered_level = []
+
+
 # Helper function that extracts the games with completed levels
 def get_games_with_completed_levels(games: dict) -> dict:
     filtered_entries = {key: value for key, value in games.items() if value["levels_completed"]}
@@ -44,48 +48,53 @@ def create_dict_completed_levels_hints(games: dict) -> dict:
     res = {}
 
     for key, value in games.items():
-        player_name = value["player_name"]
+        player_name = value["player_name"].lower()
 
-        if player_name not in res:
+        # add the player to the res dictionary if it is not in it yet
+        if key not in res:
             res[player_name] = {}
 
-        for level, hints_used in value["hints_used"].items():
-            if level not in res[player_name] or len(hints_used) < res[player_name][level]:
-                res[player_name][level] = len(hints_used)
+        # go over every level of the possible levels
+        for level in ordered_level:
+            #
+            try:
+                _ = res[player_name][level]
+            except KeyError:
+                res[player_name][level] = 0
+            try:
+                _ = len(value["hints_used"][level])
+            except KeyError:
+                value["hints_used"][level] = []
+
+            if res[player_name][level] < len(value["hints_used"][level]):
+                res[player_name][level] = len(value["hints_used"][level])
     return res
 
 
 # As before but with a given name and not all players
 def create_dict_completed_levels_same_name(games: dict) -> dict:
+
     res = {}
 
+    # go over the games dictionary and create the dictionary of completed games
     for key, value in games.items():
+        # get the name
+        name = key.split("_")[0]
 
+        # check whether the unique identifier (key) is already in res
         if key not in res:
-            res[key] = {}
+            res[name] = value["levels_completed"]
 
+        # go over the levels and times and add them to the res if it is a better time then the one seen before
+        # we do this so we can plot the best times for the player
         for level, time_taken in value["levels_completed"].items():
-            if level not in res[key] or time_taken < res[key][level]:
-                res[key][level] = time_taken
-    return res
-
-# same as the function above but with hints
-def create_dict_completed_levels_hints_same_name(games: dict) -> dict:
-    res = {}
-
-    for key, value in games.items():
-
-        if key not in res:
-            res[key] = {}
-
-        for level, hints_used in value["hints_used"].items():
-            if level not in res[key] or len(hints_used) < res[key][level]:
-                res[key][level] = len(hints_used)
+            if time_taken < res[name][level]:
+                res[name][level] = time_taken
     return res
 
 
 # This function extracts all the information from the time dictionary and hints dictionary needed for the scatter plot
-def create_dict_for_scatter_plot(times: dict, hints: dict) -> dict:
+def create_dict_for_scatter_plot(times: dict, hints: dict, games_keys=None) -> dict:
     # Extracting data for plotting
     player_names = []
     hints_dict = {}
@@ -101,23 +110,39 @@ def create_dict_for_scatter_plot(times: dict, hints: dict) -> dict:
     # max() selects the one with the most played levels
     puzzle_names = max(list(map(lambda x: list(x.keys()), times.values())))
 
+    # go over the dictionary of times, containing players and their corresponding time for each level
     for key, value in times.items():
         player_names.append(key)
+
+        # now go over the levels and add times and hints accordingly, pn == puzzle name
         for pn in puzzle_names:
+            # check if we have seen the puzzle before, if so we can append otherwise we need to create a new instance
             if pn in times_dict.keys():
+                # check whether the puzzle is in the times dictionary or not
+                # if not add None for times and -1 for hints
                 if pn not in value.keys():
                     times_dict[pn].append(None)
-                    hints_dict[pn].append(None)
+                    hints_dict[pn].append(0)
                 else:
                     times_dict[pn].append(value[pn])
-                    hints_dict[pn].append(hints[key][pn])
+                    # check whether the player used any hints for the current puzzle if not then just place a 0
+                    # otherwise enter the corresponding number
+                    if pn not in hints[key].keys():
+                        hints_dict[pn].append(0)
+                    else:
+                        hints_dict[pn].append(hints[key][pn])
             else:
+                # if there is no time for the puzzle
                 if pn not in value.keys():
                     times_dict[pn] = [None]
-                    hints_dict[pn] = [None]
+                    hints_dict[pn] = [0]
                 else:
                     times_dict[pn] = [value[pn]]
-                    hints_dict[pn] = [hints[key][pn]]
+                    # same as above, but without appending but instead adding the first entry to it
+                    if pn not in hints[key].keys():
+                        hints_dict[pn] = [0]
+                    else:
+                        hints_dict[pn] = [hints[key][pn]]
 
     # Transpose the dictionary by sorting keys in reverse order
     times_dict = {key: times_dict[key] for key in sorted(times_dict.keys(), reverse=True)}
@@ -133,7 +158,7 @@ def create_dict_for_scatter_plot(times: dict, hints: dict) -> dict:
 # This function filters the loaded games from the json file by a given player name
 def filter_dict_by_name(games: dict, name: str) -> dict:
     # reduce list of games to the ones with the given name
-    games_list = [elem for elem in games.keys() if name in elem]
+    games_list = [elem for elem in games.keys() if name.lower() in elem]
     filtered_games = {}
     for game in games_list:
         filtered_games[game] = games[game]
@@ -174,8 +199,12 @@ def filter_dict_by_name(games: dict, name: str) -> dict:
 
 # Function to plot the games dictionary, which is filtered before hand for times or hints and names or all
 def line_plot(games: dict, y_lable: str):
+
     # create a dataframe from the data
     df = pd.DataFrame(games)
+
+    # Reorder the DataFrame based on the ordered_level list
+    df = df.reindex(ordered_level)
 
     # Use seaborn for plotting
     sns.set(style="darkgrid")
@@ -265,7 +294,7 @@ def plot_times_sp(games: dict):
         return
 
     data = create_dict_completed_levels_same_name(games)
-    # TODO: aus irgend nem Grund sind hier die keys falschrum, aber nur im plot/df later
+
     line_plot(data, "Time")
 
 
@@ -287,8 +316,11 @@ def plot_hints_sp(games: dict):
     if games == {1: -1}:
         return
 
-    data = create_dict_completed_levels_hints_same_name(games)
-    # TODO: aus irgend nem Grund sind hier die keys falschrum, aber nur im plot/df later
+    data = create_dict_completed_levels_hints(games)
+
+    # data comes in reversed, so we need to fix this like this
+    data = dict(reversed(data.items()))
+
     line_plot(data, "Hints used")
 
 
@@ -313,14 +345,18 @@ def plot_times_hints_sp(games: dict):
 
     # get dicts for time and hints
     times = create_dict_completed_levels_same_name(games)
-    hints = create_dict_completed_levels_hints_same_name(games)
+    hints = create_dict_completed_levels_hints(games)
+
+    games_keys = list(games.keys())
 
     # create the needed ditcs we use for dataframes
-    dicts = create_dict_for_scatter_plot(times, hints)
+    dicts = create_dict_for_scatter_plot(times, hints, games_keys)
 
+    # create the scatter plot based on the dictionary
     scatter_plots(dicts)
 
 
+# this plots the times and hints of all players in one graph
 def plot_times_hints_all(games: dict):
     games = get_games_with_completed_levels(games)
     times = create_dict_completed_levels(games)
@@ -335,8 +371,13 @@ def calculate_score(time_taken: float, hints_used: int):
     base_score = 10000
     # for every 30 seconds above 10 minutes get a penalty of 50 points
     time_penalty = max(0.0, (time_taken - 600.0) // 30.0) * 50.0
+
+    # add a penalty of 100 points for each hint used
     hints_penalty = hints_used * 100
+
     total_penalty = time_penalty + hints_penalty
+
+    # just make sure that we do not have a negative score at the end
     score = max(0.0, base_score - total_penalty)
     return score
 
@@ -344,6 +385,8 @@ def calculate_score(time_taken: float, hints_used: int):
 # Takes the puzzle string, removes the '_' and turns first letters of words into capital letters
 def capitalize_words(s):
     words = s.split('_')
+
+    # turns the first letter into an upper case letter
     capitalized_words = [word.capitalize() for word in words]
     return ' '.join(capitalized_words)
 
@@ -374,30 +417,50 @@ def score_board(games: dict):
     # Populate puzzle times, hints, and calculate scores
     rows = []
     for player_key, player in games.items():
+        # the first entry in the row is the player name
         row = [player["player_name"], " ".join(player_key.split("_")[1:])]
         player_score = 0
 
+        # go over the puzzles and obtain the time and hints used per level
         for puzzle in puzzle_headers:
+            # at this point puzzle is capitalized for the header, so we need to recapitalize them for the search
             puzzle = decapitalize_words(puzzle)
+
+            # get the time and hints used, here we get the entry of the current puzzle from the json and set
+            # the time_taken to None if there is no entry in the dictionary
+            # We do the same for hints
             time_taken = player["levels_completed"].get(puzzle.replace("_time/hints", ""), None)
             hints_used = player["hints_used"].get(puzzle.replace("_time/hints", ""), None)
+
+            # as we want to display the number of hints, we get the len of the list if the player used any kind of hint
             if hints_used is not None:
                 hints_used = len(hints_used)
+
+            # write the time of time_taken without the s if there is no time for the current puzzle
             if time_taken is None:
                 row.append(f"{time_taken} / {hints_used}")
             else:
-                row.append(f"{time_taken}s / {hints_used}")
+                if hints_used is None:
+                    row.append(f"{time_taken}s / {0}")
+                else:
+                    row.append(f"{time_taken}s / {hints_used}")
 
         # Calculate and append score
+        # the total_time_taken is calculated similarly to the time_taken, but with a for loop to loop over all times
+        # and create a list with all times, after that summ them up using sum()
         total_time_taken = sum(
             [player["levels_completed"].get(decapitalize_words(puzzle).replace("_time/hints", ""), 0)
              for puzzle in puzzle_headers])
         total_hints_used = sum(
             [len(player["hints_used"].get(decapitalize_words(puzzle).replace("_time/hints", ""), []))
              for puzzle in puzzle_headers])
+
+        # call calculate_score to obtain the score of the player
         player_score = calculate_score(total_time_taken, total_hints_used)
+
         # Check if the player died if so set the score to Dead instead of a number
         if player["level_state"]["image_puzzle"]["death"] or player["level_state"]["number_puzzle"]["death"]:
+            # we append a placeholder to add Died in red later and have the correct stile in the table
             row.append(-1.0)
         else:
             row.append(player_score)
@@ -410,14 +473,23 @@ def score_board(games: dict):
     # Print the scoreboard using the tabulate library
     clear_console()
     write("[b]Score Board[/b]\n\n")
+
+    # write the tabulate to the console based on the information in rows, the header as defined at the top and using
+    # the pretty stile
     write(f"{tabulate(rows, headers=headers, tablefmt='pretty')}\n \n \n".replace("-1.0", "[r]Dead[/r]"), 0.0050)
+
+    # allow the player to continue by pressing enter
     inp = cinput("If you want to close the score board, press enter\n")
     clear_console()
 
 
+# This function displays the statistics menu and clears the console if wanted
 def show_menu(clear=False):
+    # if we want to clear the console before we do this here
     if clear:
         clear_console()
+
+    # write the menu to the console using the write function to allow centering and formatting tags
     write("[b] Statistics [/b]\n\n"
           "1. Times plot of all players\n"
           "2. Times plot of specific player\n"
@@ -429,15 +501,32 @@ def show_menu(clear=False):
           "8. exit", menu_delay)
 
 
+# This is just to make sure later that the dataframe for the player specific plots is ordered correctly
+def set_ordered_level(stored_games: dict):
+    # load the global variable ordered_level
+    global ordered_level
+
+    # take the first entry in the stored_games and go over the levels in the level_state section to store the correct
+    # order of levels
+    for level in stored_games[list(stored_games.keys())[0]]["level_state"]:
+        ordered_level.append(level)
+
+
 # This function handles the general functionality of the show stats section, allowing to call different functions
 # via a dictionary as an interface, which makes the function calling more dynamic
 def show_stats() -> bool:
+    # define the path to the file of stored games
     filename = 'game_data.json'
     stored_games = {}
+
+    # fill the stored_games dictionary with the information from the file
     with open(filename, 'r') as json_file:
         stored_games = json.load(json_file)
 
-    # dictionary as an interface
+    # create the list of the levels in played order
+    set_ordered_level(stored_games)
+
+    # dictionary as an interface as done for the main menu
     stat_options = {
         1: plot_times_all,
         2: plot_times_sp,
@@ -448,21 +537,34 @@ def show_stats() -> bool:
         7: score_board
     }
 
+    # display the main menu of the statistics section
     show_menu()
+
+    # ask the player what he wants to do
     inp = cinput("What do you want to do, please enter a number.\n")
+
+    # handle the player input
     while True:
+        # allow the player to always exit the menu
         if "ex" in inp:
             return False
+
+        # try to convert the input into an integer, if this doesn't work the player did not enter a valid number
+        # we presume that the player will not enter the entire name but rather opt for a number as mentioned in
+        # the prompt
         try:
             inp = int(inp)
             if inp == 8:
                 return False
-            elif inp < 8:
+
+            # check whether the inserted number is within the range of options or below/above
+            elif 0 < inp < 8:
                 stat_options[inp](stored_games)
                 show_menu(clear=True)
                 inp = cinput("What do you want to do now? Please enter a number.\n")
                 continue
             else:
                 inp = cinput("Please enter a valid number.\n")
+        # we get a ValueError if we want to convert something that is not a number into an integer
         except ValueError:
             inp = cinput("Please enter a valid number.\n")

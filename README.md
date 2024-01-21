@@ -1,5 +1,7 @@
 # Escaperoom_python_project:
 
+DIE DATEI IST LEIDER NICHT UP TO DATE :(
+
 Das hier ist einfach nur ein Repository damit alle an einem Projekt arbeiten können.
 
 Wer möchte macht sich einen eigenen Branch auf mit: git checkout -b name
@@ -27,6 +29,12 @@ Um seine änderungen hinzu zu fügen muss ins Terminal folgendes geschrieben wer
 
 Um sich den aktuellen Stand des Branches zu holen:
 - git pull origin main
+
+# Wie man das Spiel spielt:
+- öffne terminal in windows, mac oder linux
+- gehe zu dem Escaperoom ordner mit 'cd'. Z.B. indem man sowas wie 'cd /Dev/Games/Escaperoom_python_project' eingibt
+- danach gebt in die Console/das Terminal einfach ein 'python main.py' und drückt enter
+- Kleiner Tipp, achtet darauf, dass das Fenster recht groß ist, dann gibt es keine unschönen Zeilenumbrüche, also am besten in Vollbild
 
 # Sonstiges:
 Ins .gitignore können Pfade von Dateien und Directories, die nicht beachtet werden sollen und somit nicht ins Git gepusht werden.

@@ -9,7 +9,7 @@ from visuallize import show_stats
 def launch_game() -> bool:
     clear_console()
 
-    # create a game instance
+    # create a game instance, based in the name enter
     name = cinput("What is your name?:\n")
     game = Game(name)
     clear_console()

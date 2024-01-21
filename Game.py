@@ -147,6 +147,12 @@ class Game:
     def generate_unique_identifier(self) -> str:
         return f"{self._player_name.lower()}_{get_date()}"
 
+    def get_levels(self):
+        level_list = []
+        for level in levels.values():
+            level_list.append(str(level).split(" ")[1])
+        return level_list
+
     # store the completed level and update the important information
     def complete_level(self, level: str, time_taken: time):
         if level in self._levels_completed.keys():
@@ -256,7 +262,7 @@ class Game:
                             return
 
                     # displays the games that are loadable in a tabular manner
-                    display_games(stored_games, loadable_games)
+                    display_games(stored_games, loadable_games, self.get_levels())
 
                     inp = cinput("Which game do you want to load (Index)?\n")
                     # Error handling if the user input is not a number
