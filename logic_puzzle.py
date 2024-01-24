@@ -71,6 +71,6 @@ def logic_puzzle(game) -> time:
         # check whether the cinput is in the correct form or not
         elif bool([element for element in ans if element not in puzzle_symbols]):
             write("Please write your answer in the form of: a,b,c,d or did you misspell?\n"
-                  "Nonetheless less nothing seems to happen.\n")
+                  "Nonetheless nothing seems to happen.\n")
         else:
             write("Nothing seems to happen, maybe the order is not correct yet.\n")

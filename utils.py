@@ -54,7 +54,7 @@ def display_games(stored_games: dict, displayable_games: list, levels: list):
         # thus accessing at [levels[current_level] would be out of bounds
         try:
             hints_used = len(game_dic["hints_used"][levels[current_level]])
-        except IndexError:
+        except KeyError:
             hints_used = 0
 
         # get the name, date and time of the game

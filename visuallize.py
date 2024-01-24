@@ -114,6 +114,9 @@ def create_dict_for_scatter_plot(times: dict, hints: dict, games_keys=None) -> d
     for key, value in times.items():
         player_names.append(key)
 
+        # make the key lower case
+        key = key.lower()
+
         # now go over the levels and add times and hints accordingly, pn == puzzle name
         for pn in puzzle_names:
             # check if we have seen the puzzle before, if so we can append otherwise we need to create a new instance
@@ -144,9 +147,13 @@ def create_dict_for_scatter_plot(times: dict, hints: dict, games_keys=None) -> d
                     else:
                         hints_dict[pn] = [hints[key][pn]]
 
+    # now hints_dict looks like this:
+    # {'cesar_puzzle': [0, 0, 0, 0, 0], 'image_puzzle': [0, 0, 0, 0, 0], 'logic_puzzle': [0, 3, 0, 2, 1],
+    # 'maze_puzzle': [2, 0, 0, 2, 0], 'number_puzzle': [0, 0, 0, 0, 0]}
+
     # Transpose the dictionary by sorting keys in reverse order
-    times_dict = {key: times_dict[key] for key in sorted(times_dict.keys(), reverse=True)}
-    hints_dict = {key: hints_dict[key] for key in sorted(hints_dict.keys(), reverse=True)}
+    #times_dict = {key: times_dict[key] for key in sorted(times_dict.keys(), reverse=True)}
+    #hints_dict = {key: hints_dict[key] for key in sorted(hints_dict.keys(), reverse=True)}
 
     # Create dict of DataFrames
     res = {}
@@ -183,13 +190,14 @@ def filter_dict_by_name(games: dict, name: str) -> dict:
             else:
                 try:
                     inp = int(inp)
-                    if inp > len(names):
+                    if inp > len(names)-1:
                         inp = cinput("Please select a valid number.\n")
                     else:
                         name = names[inp]
                         break
                 except ValueError:
                     inp = cinput("Please select a enter a valid number.\n")
+        # filter the filtered games list again by the entered name
         games_list = [elem for elem in games.keys() if name in elem]
         filtered_games = {}
         for game in games_list:
