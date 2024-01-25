@@ -48,7 +48,7 @@ def logic_puzzle(game) -> time:
     start = time.time()
 
     while True:
-        ans = cinput("Which order do you choose? 'a,b,c,d'\n").replace(" ", "")
+        ans = cinput("Which order do you choose? 'a,b,c,d'\n").replace(" ", "").replace(".", ",").lower()
         if ans == solution:
             stop = time.time()
             write("\nYou move the symbols around and with a quite 'click' they lock in place. The fireplace instantly \n"
