@@ -69,13 +69,19 @@
     },
     "lisa_19-01-2024_23:37": {
         "player_name": "Lisa",
-        "current_level": 3,
+        "current_level": 4,
         "levels_completed": {
             "logic_puzzle": 6.7,
             "image_puzzle": 3.83,
-            "number_puzzle": 32.9
+            "number_puzzle": 32.9,
+            "maze_puzzle": 14.03
         },
-        "hints_used": {},
+        "hints_used": {
+            "cesar_puzzle": [
+                "The encryption seems to follow a famous roman emperor.",
+                "You can enter an action like push button."
+            ]
+        },
         "level_state": {
             "logic_puzzle": {
                 "death": false
@@ -91,7 +97,8 @@
                 "solution": "KGRQEPTSCMAF"
             },
             "cesar_puzzle": {
-                "death": false
+                "solution": 4,
+                "cypher": "CSYLEZIJSYRHQCRSXIJMREPPCAMXLXLMWCSYGERGSRXMRYIXSQCKVEZIALIVICSYAMPPJMRHQCQYVHIVIVXLIVIMWEWQEPPPIZIVHMWKYMWIHEWEHEKKIVXLEXAEWTPYRKIHMRXSQCGLIWXMJCSYVIQSZIMXEHSSVAMPPSTIRJSPPSAXLITEXLFILMRHMXKSSHPYGO"
             }
         }
     },

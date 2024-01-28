@@ -83,6 +83,7 @@ def cesar_puzzle(game) -> time:
         skey = random.randint(3, 23)
         enc_note = cesar_enc(skey, note.upper())
 
+        # TODO: store enc_done in state to get correct hints
         state = {
             "solution": skey,
             "cypher": enc_note
@@ -114,6 +115,7 @@ def cesar_puzzle(game) -> time:
     enc_hint_counter = 0
     action_hint_counter = 0
 
+    # count the number of hints for enc hint and action hint of the loaded game
     for hint in game.get_hints_used(game.get_current_level()):
         if hint in hints_cypher:
             enc_hint_counter += 1
@@ -138,6 +140,7 @@ def cesar_puzzle(game) -> time:
             # saves some computation by not doing the decryption
             if key == skey:
                 write(f"{note}\n")
+                enc_done = True
             else:
                 write(cesar_dec(key, enc_note))
         # just as fallback to present the project so we don't need to obtain the key manually

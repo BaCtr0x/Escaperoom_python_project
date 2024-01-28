@@ -29,6 +29,7 @@ def calculate_distance(point1, point2):
     x1, y1 = point1
     x2, y2 = point2
 
+    # abs to have positive distances
     x_dist = abs(x1 - x2)
     y_dist = abs(y1 - y2)
     return x_dist + y_dist
@@ -57,13 +58,15 @@ def random_start_end(dim: int, min_distance=0) -> list:
 
         # get random numbers on the edge of the maze along the randomly selected axis
         if s_direct == 0:
+            # 1 and (2 * dim) - 1 to avoid corner points, as we cannot go diagonally and thus would not be able to start
+            # or stop there. We use -1 as the maze is generated with dimensions (2 * dim) + 1
             start = [random.randint(1, 2 * dim - 1), 0]
         else:
             start = [0, random.randint(1, 2 * dim - 1)]
 
         # do the same for the end position
         if e_direct == 0:
-            end = [0, random.randint(1, 2 * dim - 1)]
+            end = [0, random.randint(1, 2 * dim - 1)]  # dim * 2 instead of 0, to have the end be on the bottom
         else:
             end = [random.randint(1, 2 * dim - 1), 0]
 
@@ -100,7 +103,7 @@ def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
     stack = [start]
     visited = {tuple(start)}
 
-    # Define possible directions
+    # Define possible directions (y,x)
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     # set the start to '.'
@@ -133,7 +136,6 @@ def create_maze_rand_se(dim: int, s_e_pos: list) -> np.ndarray:
                 # change the position to a path symbol if allowed
                 if maze[x + 2 * dx, y + 2 * dy] != "." and go:
                     maze[nx, ny] = '.'
-                    maze[x + dx, y + dy] = '.'
                     stack.append([nx, ny])
                     visited.add((nx, ny))
                     # to ensure that the returned maze has a connection from start to end
